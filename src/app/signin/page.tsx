@@ -113,7 +113,7 @@ export default function AuthForm() {
             {message && (
               <div
                 className={`mb-2 rounded-md p-2 text-sm ${
-                  message.includes("✅")
+                  message.includes("✅") || message.includes("Redirecting")
                     ? "bg-green-50 text-green-700 border border-green-300"
                     : "bg-red-50 text-red-700 border border-red-300"
                 }`}

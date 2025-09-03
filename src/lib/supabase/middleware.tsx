@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { UserData } from "../types/user-data";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -39,14 +40,12 @@ export async function updateSession(request: NextRequest) {
   const user = data?.claims;
 
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     return NextResponse.redirect(url);
   }
 
   if (!user && request.nextUrl.pathname.startsWith("/contact")) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     return NextResponse.redirect(url);
@@ -56,6 +55,24 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
+  }
+
+  if (user && request.nextUrl.pathname.startsWith("/admin")) {
+    const { data } = await supabase.auth.getUser();
+
+    const { data: result } = await supabase
+      .from("users")
+      .select("*, roles(*)")
+      .eq("id", data.user?.id)
+      .single();
+
+    const userData: UserData = result;
+
+    if (userData.roles.name !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
