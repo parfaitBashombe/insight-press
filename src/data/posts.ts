@@ -12,7 +12,7 @@ export interface IPost {
   date: string;
   image: string;
   category: string;
-  tags?: string[];
+  tags: string[];
 }
 
 export const posts: IPost[] = [
