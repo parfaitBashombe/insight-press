@@ -1,5 +1,7 @@
 import { Post } from "@/lib/types/post-data";
 import { Trash2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Props {
   post: Post;
@@ -7,13 +9,17 @@ interface Props {
 
 export default function PostCardCreate({ post }: Props) {
   return (
-    <div className="relative flex items-center bg-white shadow-md rounded-2xl p-4 transition-all duration-300 hover:shadow-xl">
+    <Link
+      href={`/news/${post.id}`}
+      className="relative flex items-center bg-white shadow-md rounded-2xl p-4 transition-all duration-300 hover:shadow-xl"
+    >
       {/* Cover image */}
       <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 mr-4 rounded-xl overflow-hidden">
-        <img
+        <Image
           src={post.cover_img}
           alt={post.title}
           className="object-cover w-full h-full"
+          fill
         />
       </div>
 
@@ -30,15 +36,20 @@ export default function PostCardCreate({ post }: Props) {
 
         {/* Author */}
         <div className="flex items-center space-x-2">
-          <img
-            src={
-              "https://ik.imagekit.io/zzot6yvyh/Profile_avatar.png?updatedAt=1744066805592"
-            }
-            alt={"Author"}
-            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
-          />
+          <div className="relative w-6 h-6 sm:w-8 sm:h-8">
+            <Image
+              fill
+              src={
+                post.author_avatar ||
+                "https://ik.imagekit.io/zzot6yvyh/Profile_avatar.png?updatedAt=1744066805592"
+              }
+              alt={"Author"}
+              className=" rounded-full object-cover"
+            />
+          </div>
+
           <span className="text-gray-500 text-xs sm:text-sm font-medium">
-            By You
+            By {post.author_name}
           </span>
         </div>
       </div>
@@ -50,6 +61,6 @@ export default function PostCardCreate({ post }: Props) {
       >
         <Trash2 className="w-5 h-5" />
       </button>
-    </div>
+    </Link>
   );
 }

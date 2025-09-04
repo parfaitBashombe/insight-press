@@ -15,8 +15,8 @@ export default function CreatePostPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          <PostList />
           <PostForm />
+          <PostList />
         </div>
       </div>
     </div>

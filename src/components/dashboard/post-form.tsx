@@ -4,10 +4,10 @@ import { useState } from "react";
 import {
   Send,
   Tag,
-  Check,
   ChevronsUpDown,
   Image as ImageIcon,
   X,
+  Check,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
@@ -20,14 +20,8 @@ import {
   CommandItem,
 } from "../ui/command";
 import { Button } from "../ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { useAtomValue } from "jotai";
-import { userAtom } from "@/lib/store/user-store";
-
-type Category = {
-  value: string;
-  label: string;
-};
+import { useAddPostActions, Category } from "@/lib/hooks/add-post-action";
+import Image from "next/image";
 
 const categories: Category[] = [
   { value: "web-development", label: "Web Development" },
@@ -40,77 +34,17 @@ const categories: Category[] = [
 ];
 
 export default function PostForm() {
+  const { loading, successMessage, errorMessage, submitPost } =
+    useAddPostActions();
+
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(``);
+  const [content, setContent] = useState("");
   const [category, setCategory] = useState<Category | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const author = useAtomValue(userAtom);
-
-  const supabase = createClient();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-
-    try {
-      let coverUrl = null;
-
-      if (coverImage) {
-        const fileName = `${Date.now()}-${coverImage.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("cover_images")
-          .upload(fileName, coverImage);
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from("cover_images")
-          .getPublicUrl(fileName);
-
-        coverUrl = data.publicUrl;
-      }
-
-      const { error: dbError } = await supabase.from("posts").insert({
-        author_id: author?.id,
-        title,
-        content,
-        category: category?.value,
-        tags,
-        cover_img: coverUrl,
-      });
-
-      if (dbError) throw dbError;
-
-      setSuccessMessage("✅ Post published successfully!");
-      setTitle("");
-      setContent("");
-      setCategory(null);
-      setTags([]);
-      setTagInput("");
-      setCoverImage(null);
-      setPreviewUrl(null);
-
-      // Reset success message after 7 seconds
-      setTimeout(() => setSuccessMessage(""), 7000);
-    } catch (error: any) {
-      console.error(error);
-      setErrorMessage("❌ Error: " + error.message);
-
-      // Reset error message after 7 seconds
-      setTimeout(() => setErrorMessage(""), 7000);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -125,6 +59,20 @@ export default function PostForm() {
       setCoverImage(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitPost({ title, content, category, tags, coverImage });
+
+    // Reset form after success
+    setTitle("");
+    setContent("");
+    setCategory(null);
+    setTags([]);
+    setTagInput("");
+    setCoverImage(null);
+    setPreviewUrl(null);
   };
 
   return (
@@ -186,6 +134,7 @@ export default function PostForm() {
               onChange={handleImageChange}
               className="hidden"
               id="cover-upload"
+              required
             />
             <label
               htmlFor="cover-upload"
@@ -208,11 +157,12 @@ export default function PostForm() {
             )}
           </div>
           {previewUrl && (
-            <div className="mt-3">
-              <img
+            <div className=" max-h-60 relative">
+              <Image
+                fill
                 src={previewUrl}
                 alt="Cover Preview"
-                className="rounded-xl border border-gray-200 max-h-60 object-cover"
+                className="mt-3 rounded-xl border border-gray-200 object-cover"
               />
             </div>
           )}
@@ -297,7 +247,6 @@ export default function PostForm() {
             </button>
           </div>
 
-          {/* Display tags */}
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span

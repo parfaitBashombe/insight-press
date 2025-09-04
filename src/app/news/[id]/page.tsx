@@ -1,45 +1,100 @@
-import { posts } from "@/data/posts";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Post } from "@/lib/types/post-data";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import PostDetailSkeleton from "@/components/skeletons/post-details";
+import Image from "next/image";
 
-interface Props {
-  params: { id: string };
-}
+dayjs.extend(relativeTime);
 
-const Page = ({ params }: Props) => {
-  const post = posts.find((post) => post.id === params.id);
+const Page = () => {
+  const supabase = createClient();
+  const params = useParams();
+  const postId = params.id;
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!post) {
+  useEffect(() => {
+    if (!postId) return;
+
+    const fetchPost = async () => {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("id", postId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching post:", error);
+        setPost(null);
+      } else {
+        setPost(data);
+      }
+
+      setLoading(false);
+    };
+
+    fetchPost();
+  }, [postId, supabase]);
+
+  const formatPostDate = (dateString: string) => {
+    const date = dayjs(dateString);
+    const now = dayjs();
+
+    if (now.diff(date, "day") < 1) {
+      return date.fromNow();
+    } else {
+      return date.format("MMM D, YYYY");
+    }
+  };
+
+  if (loading) return <PostDetailSkeleton />;
+
+  if (!post)
     return <p className="text-center text-gray-600 mt-10">Post not found.</p>;
-  }
 
   return (
-    <article className="max-w-3xl mx-auto px-4">
+    <article className="max-w-3xl mx-auto py-10 px-4">
       {/* Featured Image */}
-      <img
-        src={post.image}
-        alt={post.title}
-        className="w-full h-64 object-cover rounded-lg mb-6"
-      />
+      <div className="h-96 w-full relative">
+        <Image
+          src={post.cover_img}
+          alt={post.title}
+          fill
+          className="object-cover rounded-lg mb-6"
+        />
+      </div>
 
       {/* Title */}
       <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
 
       {/* Author + Date */}
       <div className="flex items-center mb-6">
-        <img
-          src={post.author.avatar}
-          alt={post.author.name}
-          className="w-10 h-10 rounded-full object-cover mr-3"
+        <Image
+          src={post.author_avatar}
+          alt={post.author_name}
+          height={40}
+          width={40}
+          className="rounded-full object-cover mr-3"
         />
         <div>
-          <p className="font-medium text-gray-700">{post.author.name}</p>
-          <p className="text-sm text-gray-400">{post.date}</p>
+          <p className="font-medium text-gray-700">{post.author_name}</p>
+          <p className="text-sm text-gray-400">
+            {formatPostDate(post.updated_at)}
+          </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="prose prose-gray max-w-none mb-8">
-        <p className="text-gray-700 leading-relaxed">{post.content}</p>
+      <div className="prose prose-gray max-w-none mb-8 whitespace-pre-line">
+        {post.content}
       </div>
 
       {/* Back Link */}
