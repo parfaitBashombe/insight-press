@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import PostCardCreate from "./post-card-create";
 import { useAtomValue } from "jotai";
-import { userAtom } from "@/lib/store/user-store";
+import { userAtom } from "@/lib/store/user-data-store";
 import { Post } from "@/lib/types/post-data";
-import PostCardSkeleton from "./post-card-skeleton";
+import PostCardSkeleton from "../skeletons/post-card-dashboard";
 
 export default function PostList() {
   const supabase = createClient();
@@ -18,9 +18,9 @@ export default function PostList() {
   useEffect(() => {
     if (!author?.id) return;
 
-    const fetchPosts = async () => {
-      setLoading(true);
+    setLoading(true);
 
+    const fetchPosts = async () => {
       const { data, error } = await supabase
         .from("posts")
         .select("*")
@@ -38,7 +38,27 @@ export default function PostList() {
     };
 
     fetchPosts();
-  }, [author?.id]);
+
+    const subscription = supabase
+      .channel(`public:posts:author_id=eq.${author.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "posts",
+          filter: `author_id=eq.${author.id}`,
+        },
+        (payload) => {
+          setPosts((prevPosts) => [payload.new as Post, ...prevPosts]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [author?.id, supabase]);
 
   const skeletons = Array.from({ length: 3 }, (_, i) => (
     <PostCardSkeleton key={i} />
@@ -58,7 +78,7 @@ export default function PostList() {
     );
 
   return (
-    <div className="space-y-4 overflow-y-auto h-[60vh] p-2 bg-gray-50 rounded-lg">
+    <div className="space-y-4 overflow-y-auto p-2 bg-gray-50 rounded-lg">
       {posts.map((post) => (
         <PostCardCreate key={post.id} post={post} />
       ))}

@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type User } from "@supabase/supabase-js";
 import { FaTimes, FaBars } from "react-icons/fa";
 import { ArrowRight, LogOut } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,25 +13,24 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "./ui/button";
 import { UserData } from "@/lib/types/user-data";
 import { useAtom } from "jotai";
-import { userAtom } from "@/lib/store/user-store";
-// import { fetchUserData } from "@/lib/fetch-user-data";
+import { userAtom, userDataAtom } from "@/lib/store/user-data-store";
+import NavbarSkeleton from "./skeletons/navbar";
 
 const links = [
   { name: "Home", href: "/" },
   { name: "News", href: "/news" },
   { name: "About", href: "/about" },
   { name: "Dashboard", href: "/dashboard" },
-  // { name: "Admin", href: "/admin" },
   { name: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useAtom<UserData | undefined>(userAtom);
+  const [user, setUser] = useAtom(userAtom);
+  const [userData, setUserData] = useAtom(userDataAtom);
+  const [loading, setLoading] = useState(true);
 
   const pathname = usePathname();
   const supabase = createClient();
@@ -68,6 +65,8 @@ export default function Navbar() {
       }
     } catch (error) {
       console.dir(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,6 +83,8 @@ export default function Navbar() {
     await supabase.auth.signOut();
     setUser(null);
   };
+
+  if (loading) return <NavbarSkeleton />;
 
   return (
     <nav

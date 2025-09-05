@@ -14,15 +14,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
 export default function AuthForm() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
-  const [message, setMessage] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSignup, setIsSignup] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function AuthForm() {
     }
   }, [message]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
@@ -42,9 +44,7 @@ export default function AuthForm() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: { username },
-          },
+          options: { data: { username } },
         });
         if (error) throw error;
         setMessage("✅ Check your email to confirm your account");
@@ -56,11 +56,13 @@ export default function AuthForm() {
         if (error) throw error;
         setMessage("✅ Signed in successfully!");
       }
+
       setUsername("");
       setEmail("");
       setPassword("");
-    } catch (err: any) {
-      setMessage(`❌ ${err.message}`);
+    } catch (err) {
+      const error = err as AuthError;
+      setMessage(`❌ ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -73,12 +75,11 @@ export default function AuthForm() {
     try {
       await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: window.location.origin,
-        },
+        options: { redirectTo: window.location.origin },
       });
-    } catch (err: any) {
-      setMessage(`❌ ${err.message}`);
+    } catch (err) {
+      const error = err as AuthError;
+      setMessage(`❌ ${error.message}`);
       setIsLoading(false);
     }
   };

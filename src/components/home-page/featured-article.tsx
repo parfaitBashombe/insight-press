@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { IPost } from "@/data/posts";
 import { ArrowRight, Calendar } from "lucide-react";
+import { Post } from "@/lib/types/post-data";
+import { formatPostDate } from "@/lib/format-date-function";
 
 type Props = {
-  featured: IPost;
+  featured: Post;
 };
 
 const FeaturedArticle = ({ featured }: Props) => {
@@ -18,7 +19,7 @@ const FeaturedArticle = ({ featured }: Props) => {
           {/* Image */}
           <div className="relative w-full h-56 sm:h-72 md:h-full">
             <Image
-              src={featured.image}
+              src={featured.cover_img}
               alt={featured.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -43,23 +44,23 @@ const FeaturedArticle = ({ featured }: Props) => {
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8">
                 {/* Author */}
                 <div className="flex items-center gap-2">
-                  {featured.author.avatar && (
+                  {featured.author_avatar && (
                     <div className="w-6 h-6 relative rounded-full overflow-hidden">
                       <Image
-                        src={featured.author.avatar}
-                        alt={featured.author.name}
+                        src={featured.author_avatar}
+                        alt={featured.author_name}
                         fill
                         className="object-cover"
                       />
                     </div>
                   )}
-                  <span>{featured.author.name}</span>
+                  <span>{featured.author_name}</span>
                 </div>
 
                 {/* Date */}
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>{featured.date}</span>
+                  <span>{formatPostDate(featured.updated_at)}</span>
                 </div>
               </div>
 

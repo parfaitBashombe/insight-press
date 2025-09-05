@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FeaturedArticle from "@/components/featured-article";
+import FeaturedArticle from "@/components/home-page/featured-article";
+import { Post } from "@/lib/types/post-data";
 
 type Props = {
-  featuredArticles: any[];
+  featuredArticles: Post[];
 };
 
 const FeaturedSlider = ({ featuredArticles }: Props) => {

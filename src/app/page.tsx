@@ -1,18 +1,70 @@
-import { posts } from "@/data/posts";
-import PostCard from "@/components/post-card";
-import Link from "next/link";
-import FeaturedSlider from "@/components/featured-slider";
-import { Mail, ArrowRight } from "lucide-react";
+"use client";
 
-const Page = () => {
-  const news = posts.filter((post) => !post.isFeatured);
-  const featuredArticles = posts.filter((post) => post.isFeatured);
+import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import {
+  postsAtom,
+  featuredPostsAtom,
+  loadingAtom,
+  fetchPostsAtom,
+  fetchFeaturedPostsAtom,
+  subscribePostsAtom,
+} from "@/lib/store/post-store";
+import PostCard from "@/components/home-page/post-card";
+import FeaturedSlider from "@/components/home-page/featured-slider";
+import PostCardSkeleton from "@/components/skeletons/post-card";
+import FeaturedArticleSkeleton from "@/components/skeletons/featured-article";
+import NewsLetter from "@/components/home-page/news-letter";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+export default function Page() {
+  const [posts] = useAtom(postsAtom);
+  const [featuredPosts] = useAtom(featuredPostsAtom);
+  const [loading] = useAtom(loadingAtom);
+
+  const [, fetchPosts] = useAtom(fetchPostsAtom);
+  const [, fetchFeaturedPosts] = useAtom(fetchFeaturedPostsAtom);
+  const [, subscribePosts] = useAtom(subscribePostsAtom);
+
+  const [firstRender, setFirstRender] = useState(true);
+
+  // Separate regular posts
+  const regularPosts = posts.filter((post) => !post.isFeatured);
+
+  useEffect(() => {
+    // Define an async function inside useEffect
+    const loadPosts = async () => {
+      await fetchPosts(true); // fetch paginated posts
+      await fetchFeaturedPosts(); // fetch featured posts
+    };
+
+    loadPosts(); // call the async function
+
+    const unsubscribe = subscribePosts(); // subscription is fine
+
+    return () => {
+      unsubscribe(); // cleanup subscription
+    };
+  }, [fetchPosts, fetchFeaturedPosts, subscribePosts]);
+
+  useEffect(() => {
+    if (posts.length > 0 || featuredPosts.length > 0) {
+      setFirstRender(false);
+    }
+  }, [posts, featuredPosts]);
+
+  const showSkeleton = loading || firstRender;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 space-y-24">
         {/* Featured Slider */}
-        <FeaturedSlider featuredArticles={featuredArticles} />
+        {showSkeleton ? (
+          <FeaturedArticleSkeleton />
+        ) : (
+          <FeaturedSlider featuredArticles={featuredPosts} />
+        )}
 
         {/* Latest Stories */}
         <section className="space-y-16">
@@ -26,63 +78,36 @@ const Page = () => {
             </p>
           </div>
 
-          <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 6).map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+          {showSkeleton ? (
+            <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <PostCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+                {regularPosts.slice(0, 6).map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
 
-          <div className="text-center pt-8">
-            <Link
-              href="/news"
-              className="group inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300"
-            >
-              View All Articles
-              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
+              <div className="text-center pt-8">
+                <Link
+                  href="/news"
+                  className="group inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300"
+                >
+                  View All Articles
+                  <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </>
+          )}
         </section>
 
         {/* Newsletter */}
-        <section className="relative">
-          <div className="relative bg-white border border-gray-200 rounded-3xl p-8 md:p-16 shadow-2xl overflow-hidden">
-            <div className="relative z-10 text-center max-w-4xl mx-auto">
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
-                  <Mail className="w-8 h-8 text-blue-600" />
-                </div>
-              </div>
-              <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-                Stay in the Loop
-              </h3>
-              <p className="mt-4 text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-                Get our latest articles, exclusive content, and insights
-                delivered straight to your inbox. No spam, we promise.
-              </p>
-
-              <form className="mt-8 flex flex-col sm:flex-row items-center justify-center max-w-lg mx-auto gap-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="w-full px-5 py-3.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 shadow-sm"
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  Subscribe
-                </button>
-              </form>
-
-              <p className="text-gray-500 text-sm mt-5">
-                Join our community of thousands of readers.
-              </p>
-            </div>
-          </div>
-        </section>
+        <NewsLetter />
       </div>
     </div>
   );
-};
-
-export default Page;
+}
