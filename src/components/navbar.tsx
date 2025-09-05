@@ -86,6 +86,8 @@ export default function Navbar() {
 
   if (loading) return <NavbarSkeleton />;
 
+  const firstSegment = "/" + pathname.split("/")[1];
+
   return (
     <nav
       className={
@@ -113,13 +115,15 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
-                    pathname === link.href ? "text-blue-600 font-semibold" : ""
+                    firstSegment === link.href
+                      ? "text-blue-600 font-semibold"
+                      : ""
                   }`}
                 >
                   {link.name}
                   <span
                     className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
-                      pathname === link.href ? "scale-x-100" : ""
+                      firstSegment === link.href ? "scale-x-100" : ""
                     }`}
                   ></span>
                 </Link>
@@ -191,7 +195,7 @@ export default function Navbar() {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
-                      pathname === link.href
+                      firstSegment === link.href
                         ? "text-blue-600 font-semibold"
                         : ""
                     }`}
@@ -199,7 +203,7 @@ export default function Navbar() {
                     {link.name}
                     <span
                       className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
-                        pathname === link.href ? "scale-x-100" : ""
+                        firstSegment === link.href ? "scale-x-100" : ""
                       }`}
                     ></span>
                   </Link>

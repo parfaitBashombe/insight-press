@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Calendar } from "lucide-react";
+import { ArrowRight, Calendar, Star } from "lucide-react";
 import { Post } from "@/lib/types/post-data";
 import { formatPostDate } from "@/lib/format-date-function";
 
@@ -13,60 +13,86 @@ const FeaturedArticle = ({ featured }: Props) => {
     <section className="w-full h-full">
       <Link
         href={`/news/${featured.id}`}
-        className="group block w-full h-full overflow-hidden rounded-2xl md:rounded-3xl bg-white shadow-md transition-shadow duration-300 hover:shadow-2xl"
+        className="group block w-full h-full overflow-hidden rounded-3xl bg-white shadow-lg border border-gray-100 transition-all duration-500 hover:shadow-xl"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-          {/* Image */}
-          <div className="relative w-full h-56 sm:h-72 md:h-full">
+          {/* Image Section with Enhanced Effects */}
+          <div className="relative w-full h-56 sm:h-72 md:h-full overflow-hidden">
             <Image
               src={featured.cover_img}
               alt={featured.title}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
+
+            {/* Category Tag */}
+            <span className="absolute top-4 left-4 z-20 px-4 py-2 text-sm font-medium rounded-2xl backdrop-blur-md bg-white/90 text-slate-800 shadow-lg border border-white/50">
+              {featured.category}
+            </span>
           </div>
 
-          {/* Content */}
-          <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center">
+          {/* Content Section */}
+          <div className="p-8 flex flex-col justify-center">
             <div>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 mb-3 sm:mb-4">
-                {featured.category}
-              </span>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4 leading-snug sm:leading-tight tracking-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight tracking-tight group-hover:text-blue-600 transition-colors duration-300">
                 {featured.title}
               </h1>
-              <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-5 sm:mb-6 max-w-2xl leading-relaxed line-clamp-3">
+              <p className="text-slate-600 text-base md:text-lg mb-6 max-w-2xl leading-relaxed line-clamp-3 group-hover:text-slate-700 transition-colors duration-300">
                 {featured.content}
               </p>
 
+              {/* Tags */}
+              {featured.tags && featured.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {featured.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Author & Date */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8">
+              <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 mb-6">
                 {/* Author */}
-                <div className="flex items-center gap-2">
-                  {featured.author_avatar && (
-                    <div className="w-6 h-6 relative rounded-full overflow-hidden">
-                      <Image
-                        src={featured.author_avatar}
-                        alt={featured.author_name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  <span>{featured.author_name}</span>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Image
+                      src={
+                        featured.author_avatar ||
+                        "https://ik.imagekit.io/zzot6yvyh/Profile_avatar.png?updatedAt=1744066805592"
+                      }
+                      alt={featured.author_name}
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 shadow-sm"
+                    />
+                  </div>
+                  <span className="font-medium text-slate-800">
+                    {featured.author_name}
+                  </span>
                 </div>
 
                 {/* Date */}
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>{formatPostDate(featured.updated_at)}</span>
+                  <Calendar className="w-4 h-4" />
+                  <span>
+                    {formatPostDate(featured.updated_at || featured.created_at)}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center text-blue-600 font-semibold text-sm sm:text-base">
-                Read Full Story
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+              {/* Read More CTA */}
+              <div className="flex items-center text-blue-600 font-semibold text-base group-hover:text-blue-700 transition-colors duration-300">
+                <span className="mr-2">Read Full Story</span>
+                <div className="p-1.5 rounded-full bg-blue-50 group-hover:bg-blue-100 group-hover:pr-4 transition-all duration-300">
+                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-3" />
+                </div>
               </div>
             </div>
           </div>

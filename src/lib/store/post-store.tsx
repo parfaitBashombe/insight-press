@@ -17,10 +17,10 @@ export const regularPostsAtom = atom((get) =>
 );
 
 // Pagination & search
-export const queryAtom = atom("");
-export const pageAtom = atom(1);
-export const hasMoreAtom = atom(true);
-export const loadingAtom = atom(false);
+export const queryAtom = atom<string>("");
+export const pageAtom = atom<number>(1);
+export const hasMoreAtom = atom<boolean>(true);
+export const loadingAtom = atom<boolean>(false);
 
 // ---------- Fetch paginated posts ----------
 export const fetchPostsAtom = atom(
