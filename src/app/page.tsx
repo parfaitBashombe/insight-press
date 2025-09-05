@@ -10,13 +10,13 @@ import {
   fetchFeaturedPostsAtom,
   subscribePostsAtom,
 } from "@/lib/store/post-store";
-import PostCard from "@/components/home-page/post-card";
 import FeaturedSlider from "@/components/home-page/featured-slider";
 import PostCardSkeleton from "@/components/skeletons/post-card";
 import FeaturedArticleSkeleton from "@/components/skeletons/featured-article";
 import NewsLetter from "@/components/home-page/news-letter";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import PostCard from "@/components/admin/post-card";
 
 export default function Page() {
   const [posts] = useAtom(postsAtom);
@@ -87,8 +87,8 @@ export default function Page() {
           ) : (
             <>
               <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-                {regularPosts.slice(0, 6).map((post) => (
-                  <PostCard key={post.id} post={post} />
+                {regularPosts.slice(0, 3).map((post) => (
+                  <PostCard isAdmin={false} key={post.id} post={post} />
                 ))}
               </div>
 

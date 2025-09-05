@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import {
   postsAtom,
   loadingAtom,
@@ -17,7 +17,7 @@ import PostFilterPanel from "@/components/admin/post-filter-panel";
 
 export default function AdminPostsReadOnly() {
   const [posts] = useAtom(postsAtom);
-  const query = useAtomValue(queryAtom);
+  const [query, setQuery] = useAtom(queryAtom);
   const [page, setPage] = useAtom(pageAtom);
   const [hasMore] = useAtom(hasMoreAtom);
   const [loading] = useAtom(loadingAtom);
@@ -113,7 +113,7 @@ export default function AdminPostsReadOnly() {
             <div className="space-y-6 md:space-y-8">
               <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2">
                 {posts.map((post) => (
-                  <PostCard isAdmin={false} key={post.id} post={post} />
+                  <PostCard isAdmin={true} key={post.id} post={post} />
                 ))}
               </div>
 
