@@ -7,61 +7,69 @@ import { Post } from "@/lib/types/post-data";
 
 const supabase = createClient();
 
-// ---------- Real-time subscription ----------
 export const subscribePostsAtom = atom(null, (get, set) => {
   const subscription = supabase
-    .channel("public:posts")
+    .channel("posts-changes")
     .on(
       "postgres_changes",
-      { event: "*", schema: "public", table: "posts" },
+      {
+        event: "*",
+        schema: "public",
+        table: "posts",
+      },
       (payload) => {
-        const posts = get(postsAtom);
-        const featuredPosts = get(featuredPostsAtom);
+        const currentPosts = [...get(postsAtom)];
+        const currentFeaturedPosts = [...get(featuredPostsAtom)];
 
         if (payload.eventType === "INSERT") {
           const newPost = payload.new as Post;
-          set(postsAtom, [newPost, ...posts]);
-
+          set(postsAtom, [newPost, ...currentPosts]);
           if (newPost.isFeatured) {
-            set(featuredPostsAtom, [newPost, ...featuredPosts]);
+            set(featuredPostsAtom, [newPost, ...currentFeaturedPosts]);
           }
         } else if (payload.eventType === "UPDATE") {
           const updatedPost = payload.new as Post;
-
           set(
             postsAtom,
-            posts.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+            currentPosts.map((p) => (p.id === updatedPost.id ? updatedPost : p))
           );
 
           if (updatedPost.isFeatured) {
-            set(
-              featuredPostsAtom,
-              featuredPosts.some((p) => p.id === updatedPost.id)
-                ? featuredPosts.map((p) =>
-                    p.id === updatedPost.id ? updatedPost : p
-                  )
-                : [updatedPost, ...featuredPosts]
+            const postExists = currentFeaturedPosts.some(
+              (p) => p.id === updatedPost.id
             );
+            if (postExists) {
+              set(
+                featuredPostsAtom,
+                currentFeaturedPosts.map((p) =>
+                  p.id === updatedPost.id ? updatedPost : p
+                )
+              );
+            } else {
+              set(featuredPostsAtom, [updatedPost, ...currentFeaturedPosts]);
+            }
           } else {
             set(
               featuredPostsAtom,
-              featuredPosts.filter((p) => p.id !== updatedPost.id)
+              currentFeaturedPosts.filter((p) => p.id !== updatedPost.id)
             );
           }
         } else if (payload.eventType === "DELETE") {
           const deletedId = payload.old.id;
           set(
             postsAtom,
-            posts.filter((p) => p.id !== deletedId)
+            currentPosts.filter((p) => p.id !== deletedId)
           );
           set(
             featuredPostsAtom,
-            featuredPosts.filter((p) => p.id !== deletedId)
+            currentFeaturedPosts.filter((p) => p.id !== deletedId)
           );
         }
       }
     )
     .subscribe();
 
-  return () => supabase.removeChannel(subscription);
+  return () => {
+    subscription.unsubscribe();
+  };
 });
