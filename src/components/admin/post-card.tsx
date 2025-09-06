@@ -1,8 +1,11 @@
+"use client";
+
 import { formatPostDate } from "@/lib/format-date-function";
 import { Post } from "@/lib/types/post-data";
 import { ArrowRight, Edit2, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface AdminPostCardProps {
   isAdmin: boolean;
@@ -17,10 +20,16 @@ export default function PostCard({
   onEdit,
   onDelete,
 }: AdminPostCardProps) {
+  const router = useRouter();
+
+  const handleOpen = () => {
+    router.push(`/news/${post.id}`);
+  };
+
   return (
-    <Link
-      href={`/news/${post.id}`}
-      className="group bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-full flex flex-col"
+    <div
+      // href={`/news/${post.id}`}
+      className="group bg-white cursor-pointer rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-full flex flex-col"
     >
       {/* Image Section */}
       <div className="h-56 w-full relative overflow-hidden">
@@ -46,7 +55,7 @@ export default function PostCard({
 
         {/* Admin Actions */}
         {isAdmin && (
-          <div className="absolute top-4 right-4 flex space-x-2 z-20">
+          <div className="absolute top-4 right-4 flex space-x-2 z-50">
             <button
               title={post.isFeatured ? "Unfeature Post" : "Feature Post"}
               className={`p-2.5 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:scale-110 ${
@@ -76,7 +85,10 @@ export default function PostCard({
       </div>
 
       {/* Content + Author Section */}
-      <div className="p-8 flex flex-col justify-between flex-1 relative">
+      <div
+        onClick={handleOpen}
+        className="p-8 flex flex-col justify-between flex-1 relative"
+      >
         {/* Post Title & Excerpt */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
@@ -134,6 +146,6 @@ export default function PostCard({
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   SubmitPostSchema,
 } from "../validators/post-validator-schemas";
 import { toast } from "sonner";
+import { PostgrestError, PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export type Category = {
   value: string;
@@ -16,7 +17,8 @@ export type Category = {
 };
 
 export const useAddPostActions = (
-  initialValues?: Partial<SubmitPostSchema>
+  initialValues?: Partial<SubmitPostSchema>,
+  type?: "update" | "create"
 ) => {
   const [values, setValues] = useState<SubmitPostSchema>({
     title: initialValues?.title || "",
@@ -123,13 +125,10 @@ export const useAddPostActions = (
     return data.publicUrl;
   };
 
-  const submitPost = async ({
-    title,
-    content,
-    category,
-    tags,
-    coverImage,
-  }: SubmitPostSchema): Promise<void> => {
+  const submitPost = async (
+    { title, content, category, tags, coverImage }: SubmitPostSchema,
+    post_id?: string
+  ): Promise<void> => {
     if (!author) {
       toast.warning("You must be logged in to publish a post.");
       return;
@@ -146,22 +145,42 @@ export const useAddPostActions = (
         coverUrl = await uploadCoverImage(coverImage);
       }
 
-      const { error: dbError } = await supabase.from("posts").insert({
-        author_id: author.id,
-        author_name: author.user_metadata?.name ?? "",
-        author_avatar: author.user_metadata?.avatar_url ?? "",
-        title,
-        content,
-        category,
-        tags,
-        cover_img: coverUrl,
-      });
+      let result: PostgrestSingleResponse<null> = {
+        error: null,
+        data: null,
+        count: 0,
+        status: 0,
+        statusText: "",
+      };
 
-      if (dbError) throw dbError;
+      if (type === "create") {
+        result = await supabase.from("posts").insert({
+          author_id: author.id,
+          author_name: author.user_metadata?.name ?? "",
+          author_avatar: author.user_metadata?.avatar_url ?? "",
+          title,
+          content,
+          category,
+          tags,
+          cover_img: coverUrl,
+        });
+      } else {
+        result = await supabase
+          .from("post")
+          .update({
+            title,
+            content,
+            category,
+            tags,
+            cover_img: coverUrl,
+          })
+          .eq("id", post_id);
+      }
+
+      if (result.error) throw result.error;
 
       toast.success("Post published successfully!");
       handleReset();
-      // setTimeout(() => setSuccessMessage(""), 7000);
     } catch (error: unknown) {
       console.error(error);
 

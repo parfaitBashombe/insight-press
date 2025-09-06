@@ -1,60 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
+import { useEffect } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+
+// ----- Atoms -----
 import {
   postsAtom,
   featuredPostsAtom,
   loadingAtom,
-  fetchPostsAtom,
-  fetchFeaturedPostsAtom,
-  subscribePostsAtom,
-} from "@/lib/store/post-store";
+} from "@/lib/store/post-atoms";
+
+// ----- Posts logic -----
+import { fetchPostsAtom } from "@/lib/posts/fetch-posts";
+import { fetchFeaturedPostsAtom } from "@/lib/posts/fetch-featured-posts";
+import { subscribePostsAtom } from "@/lib/posts/suscribe-posts";
+
+// ----- Components -----
 import FeaturedSlider from "@/components/home-page/featured-slider";
 import PostCardSkeleton from "@/components/skeletons/post-card";
 import FeaturedArticleSkeleton from "@/components/skeletons/featured-article";
 import NewsLetter from "@/components/home-page/news-letter";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import PostCard from "@/components/admin/post-card";
 
-export default function Page() {
-  const [posts] = useAtom(postsAtom);
-  const [featuredPosts] = useAtom(featuredPostsAtom);
-  const [loading] = useAtom(loadingAtom);
+// ----- Icons & Links -----
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-  const [, fetchPosts] = useAtom(fetchPostsAtom);
-  const [, fetchFeaturedPosts] = useAtom(fetchFeaturedPostsAtom);
-  const [, subscribePosts] = useAtom(subscribePostsAtom);
+export default function PostsPage() {
+  const posts = useAtomValue(postsAtom);
+  const featuredPosts = useAtomValue(featuredPostsAtom);
+  const loading = useAtomValue(loadingAtom);
 
-  const [firstRender, setFirstRender] = useState(true);
+  const fetchPosts = useSetAtom(fetchPostsAtom);
+  const fetchFeaturedPosts = useSetAtom(fetchFeaturedPostsAtom);
+  const subscribePosts = useSetAtom(subscribePostsAtom);
 
-  // Separate regular posts
+  // Regular (non-featured) posts
   const regularPosts = posts.filter((post) => !post.isFeatured);
 
   useEffect(() => {
-    // Define an async function inside useEffect
-    const loadPosts = async () => {
-      await fetchPosts(true); // fetch paginated posts
-      await fetchFeaturedPosts(); // fetch featured posts
+    let unsubscribe: (() => void) | undefined;
+
+    const loadData = async () => {
+      if (posts.length === 0) {
+        await fetchPosts(true); // reset posts
+      }
+
+      if (featuredPosts.length === 0) {
+        await fetchFeaturedPosts();
+      }
+
+      unsubscribe = subscribePosts();
     };
 
-    loadPosts(); // call the async function
-
-    const unsubscribe = subscribePosts(); // subscription is fine
+    loadData();
 
     return () => {
-      unsubscribe(); // cleanup subscription
+      if (unsubscribe) unsubscribe();
     };
-  }, [fetchPosts, fetchFeaturedPosts, subscribePosts]);
+  }, [
+    posts.length,
+    featuredPosts.length,
+    fetchPosts,
+    fetchFeaturedPosts,
+    subscribePosts,
+  ]);
 
-  useEffect(() => {
-    if (posts.length > 0 || featuredPosts.length > 0) {
-      setFirstRender(false);
-    }
-  }, [posts, featuredPosts]);
-
-  const showSkeleton = loading || firstRender;
+  const showSkeleton = loading;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
