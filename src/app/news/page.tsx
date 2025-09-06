@@ -1,54 +1,69 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+// import {
+//   postsAtom,
+//   loadingAtom,
+//   fetchPostsAtom,
+//   subscribePostsAtom,
+//   hasMoreAtom,
+//   queryAtom,
+//   pageAtom,
+// } from "@/lib/store/post-store";
+
 import {
   postsAtom,
   loadingAtom,
-  fetchPostsAtom,
-  subscribePostsAtom,
   hasMoreAtom,
-  queryAtom,
   pageAtom,
-} from "@/lib/store/post-store";
+} from "@/lib/store/post-atoms";
+
+// ----- Posts logic -----
+import { fetchPostsAtom } from "@/lib/posts/fetch-posts";
+
+import { subscribePostsAtom } from "@/lib/posts/suscribe-posts";
 import PostCardSkeleton from "@/components/skeletons/post-card";
 import PostCard from "@/components/admin/post-card";
 import PostFilterPanel from "@/components/admin/post-filter-panel";
 
 export default function AdminPostsReadOnly() {
-  const [posts] = useAtom(postsAtom);
-  const query = useAtomValue(queryAtom);
-  const [page, setPage] = useAtom(pageAtom);
-  const [hasMore] = useAtom(hasMoreAtom);
-  const [loading] = useAtom(loadingAtom);
+  const posts = useAtomValue(postsAtom);
+  const loading = useAtomValue(loadingAtom);
+
   const [, fetchPosts] = useAtom(fetchPostsAtom);
   const [, subscribePosts] = useAtom(subscribePostsAtom);
+  const hasMore = useAtomValue(hasMoreAtom);
+  const [page, setPage] = useAtom(pageAtom);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  useEffect(() => {
-    setPage(1);
-    fetchPosts(true);
-  }, [query, fetchPosts, setPage]);
+  // Regular (non-featured) posts
+  const regularPosts = posts.filter((post) => !post.isFeatured);
 
   useEffect(() => {
-    if (page > 1) fetchPosts();
-  }, [page, fetchPosts]);
+    let unsubscribe: (() => void) | undefined;
 
-  useEffect(() => {
-    fetchPosts(true);
+    const loadData = async () => {
+      if (posts.length === 0) {
+        await fetchPosts(true); // reset posts
+      }
 
-    let cleanup: (() => void) | undefined;
-
-    const setupSubscription = async () => {
-      cleanup = await subscribePosts();
+      unsubscribe = subscribePosts();
     };
 
-    setupSubscription();
+    loadData();
 
     return () => {
-      if (cleanup) cleanup();
+      if (unsubscribe) unsubscribe();
     };
   }, [fetchPosts, subscribePosts]);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchPosts(true);
+    }
+  }, []);
 
   const loadMore = () => setPage((prev) => prev + 1);
 
@@ -78,9 +93,9 @@ export default function AdminPostsReadOnly() {
           >
             <span className="font-medium">Filter Posts</span>
             <svg
-              className={`w-5 h-5 transition-transform ${
-                isFilterOpen ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 transition-transform 
+                // isFilterOpen ? "rotate-180" : ""
+              `}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -122,7 +137,7 @@ export default function AdminPostsReadOnly() {
                 <div className="flex justify-center">
                   <button
                     onClick={loadMore}
-                    className="px-5 py-2.5 md:px-6 md:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm md:text-base"
+                    className="px-5 py-2.5 md:px-6 md:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm md:text-base cursor-pointer"
                   >
                     Load More
                   </button>
