@@ -121,7 +121,7 @@ export default function PostCard({
                 {post.author_name}
               </p>
               <p className="text-xs text-slate-500 leading-none">
-                {formatPostDate(post.updated_at || post.created_at)}
+                {formatPostDate(post.updated_at)}
               </p>
             </div>
           </div>

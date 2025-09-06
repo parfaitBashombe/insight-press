@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import { Provider } from "jotai";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,13 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-grow bg-zinc-100">{children}</main>
           <Footer />
+          <Toaster
+            position="top-center"
+            expand
+            richColors
+            closeButton
+            visibleToasts={5}
+          />
         </Provider>
       </body>
     </html>

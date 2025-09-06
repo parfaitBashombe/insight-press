@@ -4,28 +4,103 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAtomValue } from "jotai";
 import { userAtom } from "../store/user-data-store";
+import {
+  submitPostSchema,
+  SubmitPostSchema,
+} from "../validators/post-validator-schemas";
+import { toast } from "sonner";
 
 export type Category = {
   value: string;
   label: string;
 };
 
-export type SubmitPostParams = {
-  title: string;
-  content: string;
-  category: Category | null;
-  tags: string[];
-  coverImage: File | null;
-};
-
-export function useAddPostActions() {
-  const supabase = createClient();
-
+export const useAddPostActions = (
+  initialValues?: Partial<SubmitPostSchema>
+) => {
+  const [values, setValues] = useState<SubmitPostSchema>({
+    title: initialValues?.title || "",
+    content: initialValues?.content || "",
+    coverImage: initialValues?.coverImage || null,
+    tags: initialValues?.tags || [],
+    category: initialValues?.category || null,
+  });
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const author = useAtomValue(userAtom);
-
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const supabase = createClient();
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, files } = e.target as HTMLInputElement;
+
+    setValues((prev) => ({
+      ...prev,
+      [name]: name === "coverImage" ? files?.[0] ?? null : value,
+    }));
+
+    if (name === "coverImage" && files) {
+      setPreviewUrl(URL.createObjectURL(files[0]));
+    }
+  };
+
+  const handleReset = () => {
+    setValues({
+      title: initialValues?.title || "",
+      content: initialValues?.content || "",
+      coverImage: initialValues?.coverImage || null,
+      tags: initialValues?.tags || [],
+      category: initialValues?.category || null,
+    });
+    handleResetImage();
+  };
+
+  const handleSetTags = (tag: string) => {
+    setValues((prev) => ({
+      ...prev,
+      tags: [...prev.tags, tag],
+    }));
+  };
+
+  const handleDeleteTag = (tag: string) => {
+    setValues((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
+  };
+
+  const handleSetCategory = (category: string) => {
+    setValues((prev) => ({
+      ...prev,
+      category,
+    }));
+  };
+
+  const handleResetImage = () => {
+    setValues((prev) => ({
+      ...prev,
+      coverImage: null,
+    }));
+    setPreviewUrl(null);
+  };
+
+  const validate = () => {
+    const result = submitPostSchema.safeParse(values);
+
+    if (!result.success) {
+      Object.values(result.error.flatten().fieldErrors).map((item, i) =>
+        toast.error(item, { id: i })
+      );
+
+      return false;
+    }
+
+    return true;
+  };
 
   const uploadCoverImage = async (file: File): Promise<string> => {
     const sanitizedFileName = file.name
@@ -43,7 +118,7 @@ export function useAddPostActions() {
       .from("cover_images")
       .getPublicUrl(fileName);
 
-    if (!data?.publicUrl) throw new Error("Failed to get public URL");
+    if (!data?.publicUrl) toast.error("Failed to get public URL");
 
     return data.publicUrl;
   };
@@ -54,9 +129,9 @@ export function useAddPostActions() {
     category,
     tags,
     coverImage,
-  }: SubmitPostParams): Promise<void> => {
+  }: SubmitPostSchema): Promise<void> => {
     if (!author) {
-      setErrorMessage("❌ You must be logged in to publish a post.");
+      toast.warning("You must be logged in to publish a post.");
       return;
     }
 
@@ -77,22 +152,23 @@ export function useAddPostActions() {
         author_avatar: author.user_metadata?.avatar_url ?? "",
         title,
         content,
-        category: category?.value ?? null,
+        category,
         tags,
         cover_img: coverUrl,
       });
 
       if (dbError) throw dbError;
 
-      setSuccessMessage("✅ Post published successfully!");
-      setTimeout(() => setSuccessMessage(""), 7000);
+      toast.success("Post published successfully!");
+      handleReset();
+      // setTimeout(() => setSuccessMessage(""), 7000);
     } catch (error: unknown) {
       console.error(error);
 
       if (error instanceof Error) {
-        setErrorMessage("❌ Error: " + error.message);
+        toast.error("Error: " + error.message);
       } else {
-        setErrorMessage("❌ An unknown error occurred");
+        toast.error("An unknown error occurred");
       }
 
       setTimeout(() => setErrorMessage(""), 7000);
@@ -101,5 +177,18 @@ export function useAddPostActions() {
     }
   };
 
-  return { loading, successMessage, errorMessage, submitPost };
-}
+  return {
+    loading,
+    successMessage,
+    errorMessage,
+    submitPost,
+    handleChange,
+    values,
+    validate,
+    previewUrl,
+    handleResetImage,
+    handleSetTags,
+    handleDeleteTag,
+    handleSetCategory,
+  };
+};

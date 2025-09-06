@@ -5,12 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Post } from "@/lib/types/post-data";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import PostDetailSkeleton from "@/components/skeletons/post-details";
 import Image from "next/image";
-
-dayjs.extend(relativeTime);
+import { formatPostDate } from "@/lib/format-date-function";
 
 const Page = () => {
   const supabase = createClient();
@@ -43,17 +40,6 @@ const Page = () => {
 
     fetchPost();
   }, [postId, supabase]);
-
-  const formatPostDate = (dateString: string) => {
-    const date = dayjs(dateString);
-    const now = dayjs();
-
-    if (now.diff(date, "day") < 1) {
-      return date.fromNow();
-    } else {
-      return date.format("MMM D, YYYY");
-    }
-  };
 
   if (loading) return <PostDetailSkeleton />;
 
