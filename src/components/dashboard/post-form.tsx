@@ -47,31 +47,32 @@ export default function PostForm() {
     e.preventDefault();
     if (validate()) {
       await submitPost(values);
-
       setTagInput("");
     }
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl p-8 md:p-10 border border-gray-100 sticky top-8 h-fit">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Add a Post</h2>
+    <div className="bg-white shadow-xl rounded-2xl p-4 md:p-6 lg:p-8 border border-gray-100 lg:sticky lg:top-8 h-fit">
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">
+        Add a Post
+      </h2>
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <div className="mb-4 p-3 text-green-800 bg-green-100 rounded-lg border border-green-200">
+        <div className="mb-4 p-3 text-green-800 bg-green-100 rounded-lg border border-green-200 text-sm md:text-base">
           {successMessage}
         </div>
       )}
       {errorMessage && (
-        <div className="mb-4 p-3 text-red-800 bg-red-100 rounded-lg border border-red-200">
+        <div className="mb-4 p-3 text-red-800 bg-red-100 rounded-lg border border-red-200 text-sm md:text-base">
           {errorMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
         {/* Title */}
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">
             Title
           </label>
           <input
@@ -80,32 +81,31 @@ export default function PostForm() {
             value={values.title}
             onChange={handleChange}
             placeholder="Enter a catchy title"
-            className="w-full h-12 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            // required
+            className="w-full h-10 md:h-12 border border-gray-300 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
         {/* Content */}
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">
             Content (min 100)
           </label>
           <textarea
             value={values.content}
             onChange={handleChange}
             name="content"
-            rows={8}
+            rows={6}
             placeholder="Write your amazing post content here..."
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+            className="w-full border border-gray-300 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
           ></textarea>
         </div>
 
         {/* Cover Image */}
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">
             Cover Image
           </label>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <input
               type="file"
               accept="image/*"
@@ -116,9 +116,9 @@ export default function PostForm() {
             />
             <label
               htmlFor="cover-upload"
-              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 transition text-gray-700"
+              className="cursor-pointer inline-flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 border border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 transition text-gray-700 text-sm md:text-base"
             >
-              <ImageIcon className="w-5 h-5" />
+              <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
               {values.coverImage ? "Change Image" : "Upload Image"}
             </label>
             {previewUrl && (
@@ -127,17 +127,17 @@ export default function PostForm() {
                 onClick={handleResetImage}
                 className="text-red-500 hover:text-red-700"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             )}
           </div>
           {previewUrl && (
-            <div className="min-h-60 relative">
+            <div className="min-h-40 md:min-h-60 relative mt-2 md:mt-3">
               <Image
                 fill
                 src={previewUrl}
                 alt="Cover Preview"
-                className="mt-3 rounded-xl border border-gray-200 object-cover"
+                className="rounded-xl border border-gray-200 object-cover"
               />
             </div>
           )}
@@ -145,7 +145,7 @@ export default function PostForm() {
 
         {/* Category */}
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">
             Category
           </label>
           <SelectCategory
@@ -157,16 +157,16 @@ export default function PostForm() {
 
         {/* Tags */}
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">
             Tags (min 2)
           </label>
-          <div className="flex gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row gap-2 mb-2">
             <input
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               placeholder="Add a tag and press Enter or click Add"
-              className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              className="flex-1 border border-gray-300 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -177,17 +177,17 @@ export default function PostForm() {
             <button
               type="button"
               onClick={handleAddTag}
-              className="inline-flex items-center gap-1 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="inline-flex items-center justify-center gap-1 bg-blue-600 text-white px-3 md:px-4 py-2 md:py-3 rounded-xl hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
             >
-              <Tag className="w-4 h-4" /> Add
+              <Tag className="w-3 h-3 md:w-4 md:h-4" /> Add
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1 md:gap-2">
             {values.tags.map((tag) => (
               <span
                 key={tag}
-                className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+                className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs md:text-sm flex items-center gap-1"
               >
                 {tag}
                 <button
@@ -207,7 +207,7 @@ export default function PostForm() {
           type="submit"
           disabled={loading}
           className={cn(
-            "w-full inline-flex cursor-pointer items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            "w-full inline-flex cursor-pointer items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold px-4 md:px-6 py-2 md:py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base",
             loading ? "opacity-70 cursor-not-allowed" : ""
           )}
         >
@@ -215,7 +215,7 @@ export default function PostForm() {
             "Publishing..."
           ) : (
             <>
-              <Send className="w-5 h-5" /> Publish Post
+              <Send className="w-4 h-4 md:w-5 md:h-5" /> Publish Post
             </>
           )}
         </button>

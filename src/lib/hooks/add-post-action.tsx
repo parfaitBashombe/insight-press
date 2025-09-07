@@ -9,7 +9,7 @@ import {
   SubmitPostSchema,
 } from "../validators/post-validator-schemas";
 import { toast } from "sonner";
-import { PostgrestError, PostgrestSingleResponse } from "@supabase/supabase-js";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export type Category = {
   value: string;
@@ -17,8 +17,7 @@ export type Category = {
 };
 
 export const useAddPostActions = (
-  initialValues?: Partial<SubmitPostSchema>,
-  type?: "update" | "create"
+  initialValues?: Partial<SubmitPostSchema>
 ) => {
   const [values, setValues] = useState<SubmitPostSchema>({
     title: initialValues?.title || "",
@@ -153,29 +152,29 @@ export const useAddPostActions = (
         statusText: "",
       };
 
-      if (type === "create") {
-        result = await supabase.from("posts").insert({
-          author_id: author.id,
-          author_name: author.user_metadata?.name ?? "",
-          author_avatar: author.user_metadata?.avatar_url ?? "",
-          title,
-          content,
-          category,
-          tags,
-          cover_img: coverUrl,
-        });
-      } else {
-        result = await supabase
-          .from("post")
-          .update({
-            title,
-            content,
-            category,
-            tags,
-            cover_img: coverUrl,
-          })
-          .eq("id", post_id);
-      }
+      // if (type === "create") {
+      result = await supabase.from("posts").insert({
+        author_id: author.id,
+        author_name: author.user_metadata?.name ?? "",
+        author_avatar: author.user_metadata?.avatar_url ?? "",
+        title,
+        content,
+        category,
+        tags,
+        cover_img: coverUrl,
+      });
+      // } else {
+      //   result = await supabase
+      //     .from("posts")
+      //     .update({
+      //       title,
+      //       content,
+      //       category,
+      //       tags,
+      //       cover_img: coverUrl,
+      //     })
+      //     .eq("id", post_id);
+      // }
 
       if (result.error) throw result.error;
 

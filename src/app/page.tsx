@@ -42,31 +42,30 @@ export default function PostsPage() {
     let unsubscribe: (() => void) | undefined;
 
     const loadData = async () => {
-      if (posts.length === 0) {
-        await fetchPosts(true); // reset posts
-      }
+      try {
+        // Always fetch fresh data on component mount
+        await Promise.all([
+          fetchPosts(true), // reset posts
+          fetchFeaturedPosts(),
+        ]);
 
-      if (featuredPosts.length === 0) {
-        await fetchFeaturedPosts();
+        // Set up subscription after initial data load
+        unsubscribe = subscribePosts();
+      } catch (error) {
+        console.error("Failed to load posts:", error);
       }
-
-      unsubscribe = subscribePosts();
     };
 
     loadData();
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
-  }, [
-    posts.length,
-    featuredPosts.length,
-    fetchPosts,
-    fetchFeaturedPosts,
-    subscribePosts,
-  ]);
+  }, [fetchPosts, fetchFeaturedPosts, subscribePosts]);
 
-  const showSkeleton = loading;
+  const showSkeleton = loading && posts.length === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
