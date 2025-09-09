@@ -28,10 +28,8 @@ interface Props {
 export default function PostCardCreate({ post }: Props) {
   const supabase = createClient();
 
-  // activate subscription
   useAtom(subscribePostsAtom);
 
-  // read postsAtom to trigger re-render when posts change
   useAtomValue(postsAtom);
 
   const handleDelete = async (id: string) => {
@@ -101,7 +99,9 @@ export default function PostCardCreate({ post }: Props) {
           className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm"
           aria-label="Edit post"
         >
-          <Edit className="w-5 h-5" />
+          <Link href={`/dashboard/${post.id}`}>
+            <Edit className="w-5 h-5" />
+          </Link>
         </button>
         {/* </Link> */}
 
