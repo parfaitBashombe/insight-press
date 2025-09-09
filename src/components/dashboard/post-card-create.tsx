@@ -28,14 +28,19 @@ interface Props {
 export default function PostCardCreate({ post }: Props) {
   const supabase = createClient();
 
-  // activate subscription
   useAtom(subscribePostsAtom);
 
-  // read postsAtom to trigger re-render when posts change
   useAtomValue(postsAtom);
 
   const handleDelete = async (id: string) => {
+    const { error: errorImage } = await supabase.storage
+      .from("cover_images")
+      .remove([`${post.cover_img}`]);
+
+    if (errorImage) console.error("Error deleting image:", errorImage);
+
     const { error } = await supabase.from("posts").delete().eq("id", id);
+
     if (error) {
       toast.error(error.message);
     } else {
@@ -101,7 +106,9 @@ export default function PostCardCreate({ post }: Props) {
           className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm"
           aria-label="Edit post"
         >
-          <Edit className="w-5 h-5" />
+          <Link href={`/dashboard/${post.id}`}>
+            <Edit className="w-5 h-5" />
+          </Link>
         </button>
         {/* </Link> */}
 

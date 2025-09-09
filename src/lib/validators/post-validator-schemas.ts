@@ -4,7 +4,10 @@ export const submitPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(100, "Minimum 100 characters for the content"),
   coverImage: z
-    .instanceof(File, { message: "Cover image is required" })
+    .union([
+      z.instanceof(File, { message: "Cover image must be a valid file" }),
+      z.string().url({ message: "Cover image must be a valid URL" }),
+    ])
     .nullable()
     .refine((file) => file !== null, {
       message: "Cover image is required",

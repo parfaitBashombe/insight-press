@@ -9,7 +9,6 @@ import {
   SubmitPostSchema,
 } from "../validators/post-validator-schemas";
 import { toast } from "sonner";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export type Category = {
   value: string;
@@ -36,6 +35,7 @@ export const useAddPostActions = (
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    // coverImage?: string
   ) => {
     const { name, value, files } = e.target as HTMLInputElement;
 
@@ -44,7 +44,12 @@ export const useAddPostActions = (
       [name]: name === "coverImage" ? files?.[0] ?? null : value,
     }));
 
-    if (name === "coverImage" && files) {
+    // if (coverImage) {
+    //   setValues((prev) => ({ ...prev, coverImage }));
+    // }
+
+    // Only create object URL if we have a File object, not a string
+    if (name === "coverImage" && files && files[0] instanceof File) {
       setPreviewUrl(URL.createObjectURL(files[0]));
     }
   };
@@ -103,10 +108,14 @@ export const useAddPostActions = (
     return true;
   };
 
-  const uploadCoverImage = async (file: File): Promise<string> => {
+  const uploadCoverImage = async (file: File | string): Promise<string> => {
+    if (typeof file === "string") {
+      return file;
+    }
+
     const sanitizedFileName = file.name
-      .replace(/\s+/g, "-") // replace spaces with dashes
-      .replace(/[^a-zA-Z0-9.\-_]/g, ""); // remove invalid characters
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9.\-_]/g, "");
 
     const fileName = `${Date.now()}-${sanitizedFileName}`;
     const { error: uploadError } = await supabase.storage
@@ -119,7 +128,7 @@ export const useAddPostActions = (
       .from("cover_images")
       .getPublicUrl(fileName);
 
-    if (!data?.publicUrl) toast.error("Failed to get public URL");
+    if (!data?.publicUrl) throw new Error("Failed to get public URL");
 
     return data.publicUrl;
   };
@@ -144,16 +153,8 @@ export const useAddPostActions = (
         coverUrl = await uploadCoverImage(coverImage);
       }
 
-      let result: PostgrestSingleResponse<null> = {
-        error: null,
-        data: null,
-        count: 0,
-        status: 0,
-        statusText: "",
-      };
-
-      // if (type === "create") {
-      result = await supabase.from("posts").insert({
+      const upsertData = {
+        id: post_id,
         author_id: author.id,
         author_name: author.user_metadata?.name ?? "",
         author_avatar: author.user_metadata?.avatar_url ?? "",
@@ -161,25 +162,23 @@ export const useAddPostActions = (
         content,
         category,
         tags,
-        cover_img: coverUrl,
-      });
-      // } else {
-      //   result = await supabase
-      //     .from("posts")
-      //     .update({
-      //       title,
-      //       content,
-      //       category,
-      //       tags,
-      //       cover_img: coverUrl,
-      //     })
-      //     .eq("id", post_id);
-      // }
+        ...(coverUrl ? { cover_img: coverUrl } : {}),
+      };
 
-      if (result.error) throw result.error;
+      const { error } = await supabase
+        .from("posts")
+        .upsert(upsertData, { onConflict: "id" })
+        .select()
+        .single();
 
-      toast.success("Post published successfully!");
-      handleReset();
+      if (error) throw toast.error(error.message);
+
+      toast.success(
+        post_id ? "Post updated successfully!" : "Post published successfully!"
+      );
+      if (!post_id) {
+        handleReset();
+      }
     } catch (error: unknown) {
       console.error(error);
 
@@ -197,13 +196,16 @@ export const useAddPostActions = (
 
   return {
     loading,
+    setLoading,
     successMessage,
     errorMessage,
     submitPost,
     handleChange,
     values,
+    setValues,
     validate,
     previewUrl,
+    setPreviewUrl,
     handleResetImage,
     handleSetTags,
     handleDeleteTag,

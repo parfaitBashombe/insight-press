@@ -8,7 +8,7 @@ import Image from "next/image";
 import SelectCategory from "./select-category";
 import { cn } from "@/lib/utils";
 
-const categories: Category[] = [
+export const categories: Category[] = [
   { value: "Web Development", label: "Web Development" },
   { value: "UI/UX Design", label: "UI/UX Design" },
   { value: "Artificial Intelligence", label: "Artificial Intelligence" },
