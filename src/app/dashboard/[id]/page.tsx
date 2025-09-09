@@ -8,16 +8,16 @@ import UpdatePostSkeleton from "@/components/skeletons/update-post";
 import { useAddPostActions } from "@/lib/hooks/add-post-action";
 import { cn } from "@/lib/utils";
 import { Image as ImageIcon, X } from "lucide-react";
+import SelectCategory from "@/components/dashboard/select-category";
+import { categories } from "@/components/dashboard/post-form";
+import { toast } from "sonner";
 
 const UpdatePostPage = () => {
   const supabase = createClient();
   const params = useParams();
   const router = useRouter();
   const postId = params.id;
-
-  const [loadingPost, setLoadingPost] = useState(true);
-  const [postNotFound, setPostNotFound] = useState(false);
-  const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const {
     loading,
@@ -26,63 +26,52 @@ const UpdatePostPage = () => {
     submitPost,
     handleChange,
     values,
+    setValues,
     validate,
     previewUrl,
     handleResetImage,
     handleSetTags,
     handleDeleteTag,
     handleSetCategory,
+    setPreviewUrl,
   } = useAddPostActions();
 
   const [tagInput, setTagInput] = useState("");
 
-  // Fetch existing post data
+  const fetchPost = async () => {
+    setIsInitialLoading(true);
+
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("id", postId)
+      .single();
+
+    if (error || !data) {
+      toast.error("Error fetching post");
+      setIsInitialLoading(false);
+      return;
+    }
+
+    if (data) {
+      setValues({
+        coverImage: data.cover_img,
+        title: data.title,
+        content: data.content,
+        category: data.category,
+        tags: data.tags,
+      });
+      setPreviewUrl(data.cover_img);
+    }
+
+    setIsInitialLoading(false);
+  };
+
   useEffect(() => {
-    if (!postId) return;
-
-    const fetchPost = async () => {
-      setLoadingPost(true);
-
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", postId)
-        .single();
-
-      if (error || !data) {
-        console.error("Error fetching post:", error);
-        setPostNotFound(true);
-      } else {
-        // Set the existing image URL for preview
-        if (data.cover_img) {
-          setExistingCoverUrl(data.cover_img);
-          // Set coverImage to the URL string
-          handleChange({
-            target: {
-              name: "coverImage",
-              value: data.cover_img,
-            },
-          } as any);
-        }
-
-        // Populate useAddPostActions state
-        handleSetCategory(data.category ?? "");
-        if (Array.isArray(data.tags)) {
-          data.tags.forEach((tag: string) => handleSetTags(tag));
-        }
-
-        // Populate other fields
-        handleChange({ target: { name: "title", value: data.title } } as any);
-        handleChange({
-          target: { name: "content", value: data.content },
-        } as any);
-      }
-
-      setLoadingPost(false);
-    };
-
-    fetchPost();
-  }, [postId, supabase]);
+    if (postId) {
+      fetchPost();
+    }
+  }, []);
 
   const handleAddTag = () => {
     const t = tagInput.trim();
@@ -92,29 +81,20 @@ const UpdatePostPage = () => {
     }
   };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setExistingCoverUrl(null);
-    handleChange(e);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // const submitData = {
-    //   ...values,
-    //   coverImage: previewUrl ? values.coverImage : existingCoverUrl,
-    // };
+    if (!previewUrl) {
+      toast.warning("No Image found!");
+      return;
+    }
 
-    if (!validate()) return;
-
-    await submitPost(values, postId as string);
-    console.dir(values);
+    if (validate()) {
+      await submitPost(values, postId as string);
+    }
   };
 
-  if (loadingPost) return <UpdatePostSkeleton />;
-  if (postNotFound)
+  if (isInitialLoading) return <UpdatePostSkeleton />;
+  if (!values)
     return <p className="text-center text-gray-600 mt-10">Post not found.</p>;
 
   return (
@@ -132,7 +112,7 @@ const UpdatePostPage = () => {
               type="file"
               accept="image/*"
               name="coverImage"
-              onChange={handleCoverChange}
+              onChange={handleChange}
               className="hidden"
               id="cover-upload"
             />
@@ -143,12 +123,11 @@ const UpdatePostPage = () => {
               <ImageIcon className="w-4 h-4" />
               {values.coverImage ? "Change Image" : "Upload Image"}
             </label>
-            {(previewUrl || existingCoverUrl) && (
+            {previewUrl && (
               <button
                 type="button"
                 onClick={() => {
                   handleResetImage();
-                  setExistingCoverUrl(null);
                 }}
                 className="text-red-500 hover:text-red-700"
               >
@@ -157,10 +136,10 @@ const UpdatePostPage = () => {
             )}
           </div>
 
-          {(previewUrl || existingCoverUrl) && (
+          {previewUrl && (
             <div className="h-96 w-full relative mb-3 bg-gray-50 rounded-lg overflow-hidden">
               <Image
-                src={previewUrl || existingCoverUrl || ""}
+                src={previewUrl || ""}
                 alt={values.title || "Cover Image"}
                 fill
                 className="object-cover"
@@ -200,12 +179,18 @@ const UpdatePostPage = () => {
           <label className="block font-medium text-gray-700 mb-2">
             Category
           </label>
-          <input
+          {/* <input
             type="text"
             name="category"
             value={values.category ?? ""}
             onChange={(e) => handleSetCategory(e.target.value)}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          /> */}
+
+          <SelectCategory
+            categories={categories}
+            value={values.category}
+            setValue={handleSetCategory}
           />
         </div>
 

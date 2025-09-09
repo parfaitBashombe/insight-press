@@ -33,7 +33,14 @@ export default function PostCardCreate({ post }: Props) {
   useAtomValue(postsAtom);
 
   const handleDelete = async (id: string) => {
+    const { error: errorImage } = await supabase.storage
+      .from("cover_images")
+      .remove([`${post.cover_img}`]);
+
+    if (errorImage) console.error("Error deleting image:", errorImage);
+
     const { error } = await supabase.from("posts").delete().eq("id", id);
+
     if (error) {
       toast.error(error.message);
     } else {

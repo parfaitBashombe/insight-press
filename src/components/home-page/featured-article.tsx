@@ -46,9 +46,9 @@ const FeaturedArticle = ({ featured }: Props) => {
               {/* Tags */}
               {featured.tags && featured.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {featured.tags.map((tag) => (
+                  {featured.tags.map((tag, index) => (
                     <span
-                      key={tag}
+                      key={index}
                       className="text-xs font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200"
                     >
                       {tag}

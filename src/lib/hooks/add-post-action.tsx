@@ -9,7 +9,6 @@ import {
   SubmitPostSchema,
 } from "../validators/post-validator-schemas";
 import { toast } from "sonner";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export type Category = {
   value: string;
@@ -36,6 +35,7 @@ export const useAddPostActions = (
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    // coverImage?: string
   ) => {
     const { name, value, files } = e.target as HTMLInputElement;
 
@@ -43,6 +43,10 @@ export const useAddPostActions = (
       ...prev,
       [name]: name === "coverImage" ? files?.[0] ?? null : value,
     }));
+
+    // if (coverImage) {
+    //   setValues((prev) => ({ ...prev, coverImage }));
+    // }
 
     // Only create object URL if we have a File object, not a string
     if (name === "coverImage" && files && files[0] instanceof File) {
@@ -172,7 +176,9 @@ export const useAddPostActions = (
       toast.success(
         post_id ? "Post updated successfully!" : "Post published successfully!"
       );
-      handleReset();
+      if (!post_id) {
+        handleReset();
+      }
     } catch (error: unknown) {
       console.error(error);
 
@@ -190,13 +196,16 @@ export const useAddPostActions = (
 
   return {
     loading,
+    setLoading,
     successMessage,
     errorMessage,
     submitPost,
     handleChange,
     values,
+    setValues,
     validate,
     previewUrl,
+    setPreviewUrl,
     handleResetImage,
     handleSetTags,
     handleDeleteTag,
