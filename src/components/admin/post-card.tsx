@@ -4,7 +4,6 @@ import { formatPostDate } from "@/lib/format-date-function";
 import { Post } from "@/lib/types/post-data";
 import { ArrowRight, Edit2, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface AdminPostCardProps {
@@ -101,9 +100,9 @@ export default function PostCard({
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
-              {post.tags.map((tag) => (
+              {post.tags.map((tag, index) => (
                 <span
-                  key={tag}
+                  key={index}
                   className="text-xs font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors duration-200 border border-slate-200"
                 >
                   {tag}

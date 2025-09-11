@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Calendar, Star } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import { Post } from "@/lib/types/post-data";
 import { formatPostDate } from "@/lib/format-date-function";
 
