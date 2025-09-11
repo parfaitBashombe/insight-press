@@ -17,6 +17,7 @@ import { UserData } from "@/lib/types/user-data";
 import { useAtom } from "jotai";
 import { userAtom, userDataAtom } from "@/lib/store/user-data-store";
 import NavbarSkeleton from "./skeletons/navbar";
+import Image from "next/image";
 
 const links = [
   { name: "Home", href: "/" },
@@ -133,12 +134,13 @@ export default function Navbar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <span className="overflow-hidden w-10 h-10 bg-accent rounded-full flex items-center justify-center cursor-pointer">
+                  <span className="overflow-hidden w-10 h-10 relative bg-accent rounded-full flex items-center justify-center cursor-pointer">
                     {user.user_metadata?.picture ? (
-                      <img
+                      <Image
                         src={user.user_metadata.picture}
                         alt="profile"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       getInitials(user?.email)
@@ -215,12 +217,13 @@ export default function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <p className="flex items-center flex-wrap gap-2">
-                    <span className="overflow-hidden w-10 h-10 bg-accent rounded-full flex items-center justify-center">
+                    <span className="overflow-hidden w-10 h-10 relative bg-accent rounded-full flex items-center justify-center">
                       {user.user_metadata?.picture ? (
-                        <img
+                        <Image
                           src={user.user_metadata.picture}
                           alt="profile"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         getInitials(user?.email)

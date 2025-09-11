@@ -1,54 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-// import {
-//   postsAtom,
-//   loadingAtom,
-//   fetchPostsAtom,
-//   subscribePostsAtom,
-//   hasMoreAtom,
-//   queryAtom,
-//   pageAtom,
-// } from "@/lib/store/post-store";
-
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useAtom, useAtomValue } from "jotai";
 import {
   postsAtom,
   loadingAtom,
   hasMoreAtom,
   pageAtom,
 } from "@/lib/store/post-atoms";
-
-// ----- Posts logic -----
 import { fetchPostsAtom } from "@/lib/posts/fetch-posts";
-
 import { subscribePostsAtom } from "@/lib/posts/suscribe-posts";
 import PostCardSkeleton from "@/components/skeletons/post-card";
 import PostCard from "@/components/admin/post-card";
 import PostFilterPanel from "@/components/admin/post-filter-panel";
+import { categories } from "@/components/dashboard/post-form";
 
 export default function AdminPostsReadOnly() {
   const posts = useAtomValue(postsAtom);
   const loading = useAtomValue(loadingAtom);
-
-  const [, fetchPosts] = useAtom(fetchPostsAtom);
-  const [, subscribePosts] = useAtom(subscribePostsAtom);
   const hasMore = useAtomValue(hasMoreAtom);
   const [page, setPage] = useAtom(pageAtom);
-
+  const [, fetchPosts] = useAtom(fetchPostsAtom);
+  const [, subscribePosts] = useAtom(subscribePostsAtom);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Regular (non-featured) posts
-  const regularPosts = posts.filter((post) => !post.isFeatured);
-
+  // Initial load + subscription
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
     const loadData = async () => {
-      if (posts.length === 0) {
-        await fetchPosts(true); // reset posts
-      }
-
+      await fetchPosts(true); // reset posts and page to 1
       unsubscribe = subscribePosts();
     };
 
@@ -57,18 +40,48 @@ export default function AdminPostsReadOnly() {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [fetchPosts, subscribePosts]);
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchPosts(true);
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadMore = () => setPage((prev) => prev + 1);
+  // Fetch posts whenever page changes (append)
+  useEffect(() => {
+    if (page > 1) {
+      fetchPosts(false);
+    }
+  }, [page, fetchPosts]);
 
-  // Extract unique categories and tags for filter panel
-  const categories = Array.from(new Set(posts.map((p) => p.category)));
+  // Infinite scroll
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      setPage((p) => p + 1);
+    }
+  }, [loading, hasMore, setPage]);
+
+  // Intersection Observer
+  useEffect(() => {
+    if (!hasMore || loading) return;
+
+    const options = {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0.1,
+    };
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    }, options);
+
+    if (loadMoreRef.current) {
+      observer.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, [loadMore, hasMore, loading]);
+
   const tags = Array.from(new Set(posts.flatMap((p) => p.tags)));
 
   return (
@@ -85,7 +98,7 @@ export default function AdminPostsReadOnly() {
           </p>
         </header>
 
-        {/* Mobile Filter Toggle Button */}
+        {/* Mobile Filter Toggle */}
         <div className="lg:hidden mb-6">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -93,9 +106,9 @@ export default function AdminPostsReadOnly() {
           >
             <span className="font-medium">Filter Posts</span>
             <svg
-              className={`w-5 h-5 transition-transform 
-                // isFilterOpen ? "rotate-180" : ""
-              `}
+              className={`w-5 h-5 transition-transform ${
+                isFilterOpen ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -110,46 +123,53 @@ export default function AdminPostsReadOnly() {
           </button>
         </div>
 
-        {/* Main Content Grid: Filter + Posts */}
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 md:gap-8">
           {/* Filter Panel */}
           <div className={`${isFilterOpen ? "block" : "hidden"} lg:block`}>
             <PostFilterPanel categories={categories} tags={tags} />
           </div>
 
-          {/* Posts Section */}
-          {loading ? (
+          {/* Posts */}
+          <div className="space-y-6 md:space-y-8">
             <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <PostCardSkeleton key={i} />
+              {posts.map((post) => (
+                <PostCard isAdmin={false} key={post.id} post={post} />
               ))}
-            </div>
-          ) : posts.length > 0 ? (
-            <div className="space-y-6 md:space-y-8">
-              <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2">
-                {posts.map((post) => (
-                  <PostCard isAdmin={false} key={post.id} post={post} />
-                ))}
-              </div>
 
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={loadMore}
-                    className="px-5 py-2.5 md:px-6 md:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm md:text-base cursor-pointer"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
+              {loading &&
+                Array.from({ length: 6 }).map((_, i) => (
+                  <PostCardSkeleton key={`skeleton-${i}`} />
+                ))}
             </div>
-          ) : (
-            <p className="text-center text-gray-400 py-8 md:py-12 col-span-full">
-              No posts available.
-            </p>
-          )}
+
+            {/* Infinite scroll trigger */}
+            {hasMore && (
+              <div
+                ref={loadMoreRef}
+                className="h-10 flex items-center justify-center"
+              >
+                {loading && (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                )}
+              </div>
+            )}
+
+            {/* End message */}
+            {!hasMore && posts.length > 0 && (
+              <p className="text-center text-gray-400 py-4">
+                You've reached the end of all posts.
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Empty state */}
+        {!loading && posts.length === 0 && (
+          <p className="text-center text-gray-400 py-8 md:py-12 col-span-full">
+            No posts available.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import {
   postsAtom,
   loadingAtom,
@@ -17,7 +17,7 @@ import PostFilterPanel from "@/components/admin/post-filter-panel";
 
 export default function AdminPostsReadOnly() {
   const [posts] = useAtom(postsAtom);
-  const [query, setQuery] = useAtom(queryAtom);
+  const query = useAtomValue(queryAtom);
   const [page, setPage] = useAtom(pageAtom);
   const [hasMore] = useAtom(hasMoreAtom);
   const [loading] = useAtom(loadingAtom);

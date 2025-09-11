@@ -1,9 +1,10 @@
+import { Category } from "@/lib/hooks/add-post-action";
 import { queryAtom } from "@/lib/store/post-store";
 import { useAtom } from "jotai";
 import { useState } from "react";
 
 interface PostFilterPanelProps {
-  categories: string[];
+  categories: Category[];
   tags: string[];
 }
 
@@ -54,8 +55,8 @@ export default function PostFilterPanel({
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
             </option>
           ))}
         </select>
