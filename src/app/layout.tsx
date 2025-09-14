@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import { Provider } from "jotai";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +69,7 @@ export default function RootLayout({
             visibleToasts={5}
           />
         </Provider>
+        <Analytics />
       </body>
     </html>
   );

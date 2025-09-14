@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
+      from: "Contact Form <insight-press-lime.vercel.app>",
       to: [myEmail],
       subject: `[Contact Form] ${title}`,
       html: `
