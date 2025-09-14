@@ -14,6 +14,7 @@ import {
 import PostCardSkeleton from "@/components/skeletons/post-card";
 import PostCard from "@/components/admin/post-card";
 import PostFilterPanel from "@/components/admin/post-filter-panel";
+import { categories } from "@/components/dashboard/post-form";
 
 export default function AdminPostsReadOnly() {
   const [posts] = useAtom(postsAtom);
@@ -52,8 +53,6 @@ export default function AdminPostsReadOnly() {
 
   const loadMore = () => setPage((prev) => prev + 1);
 
-  // Extract unique categories and tags for filter panel
-  const categories = Array.from(new Set(posts.map((p) => p.category)));
   const tags = Array.from(new Set(posts.flatMap((p) => p.tags)));
 
   return (

@@ -36,8 +36,8 @@ export default function PostList() {
           setPosts(data || []);
         }
       } catch (err) {
-        toast.error("Unexpected error fetching posts");
-        setPosts([]);
+        const message = err instanceof Error ? err.message : String(err);
+        toast.error(`Unexpected error fetching posts: ${message}`);
       } finally {
         setLoading(false);
       }
