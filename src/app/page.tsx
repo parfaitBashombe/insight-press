@@ -26,7 +26,7 @@ import PostCard from "@/components/admin/post-card";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-export default function PostsPage() {
+export default function HomePage() {
   const posts = useAtomValue(postsAtom);
   const featuredPosts = useAtomValue(featuredPostsAtom);
   const loading = useAtomValue(loadingAtom);

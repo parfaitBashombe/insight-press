@@ -1,7 +1,7 @@
 import PostList from "@/components/dashboard/posts-list";
 import PostForm from "@/components/dashboard/post-form";
 
-export default function CreatePostPage() {
+export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
