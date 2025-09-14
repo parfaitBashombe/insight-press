@@ -62,6 +62,26 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* User Publishing Info */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            Publish Your Posts
+          </h2>
+          <p className="text-gray-600 leading-relaxed">
+            InsightPress allows registered users to publish their own posts. By
+            contributing content, you agree to follow our{" "}
+            <Link href="/terms" className="text-blue-600 hover:underline">
+              Terms and Conditions
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-blue-600 hover:underline">
+              Privacy Policy
+            </Link>
+            . Ensure your content is original, respectful, and valuable to the
+            community.
+          </p>
+        </section>
+
         {/* Contact Info */}
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Contact Me</h2>

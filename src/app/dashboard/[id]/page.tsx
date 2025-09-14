@@ -37,6 +37,9 @@ const UpdatePostPage = () => {
   } = useAddPostActions();
 
   const [tagInput, setTagInput] = useState("");
+  const [originalValues, setOriginalValues] = useState<typeof values | null>(
+    null
+  );
 
   const fetchPost = async () => {
     setIsInitialLoading(true);
@@ -53,24 +56,22 @@ const UpdatePostPage = () => {
       return;
     }
 
-    if (data) {
-      setValues({
-        coverImage: data.cover_img,
-        title: data.title,
-        content: data.content,
-        category: data.category,
-        tags: data.tags,
-      });
-      setPreviewUrl(data.cover_img);
-    }
+    const postValues = {
+      coverImage: data.cover_img,
+      title: data.title,
+      content: data.content,
+      category: data.category,
+      tags: data.tags,
+    };
 
+    setValues(postValues);
+    setOriginalValues(postValues);
+    setPreviewUrl(data.cover_img);
     setIsInitialLoading(false);
   };
 
   useEffect(() => {
-    if (postId) {
-      fetchPost();
-    }
+    if (postId) fetchPost();
   }, []);
 
   const handleAddTag = () => {
@@ -88,8 +89,24 @@ const UpdatePostPage = () => {
       return;
     }
 
+    if (!originalValues) return;
+
+    // Check if any field has changed
+    const hasChanges =
+      values.title !== originalValues.title ||
+      values.content !== originalValues.content ||
+      values.category !== originalValues.category ||
+      JSON.stringify(values.tags) !== JSON.stringify(originalValues.tags) ||
+      values.coverImage !== originalValues.coverImage;
+
+    if (!hasChanges) {
+      toast.info("No changes detected. Update not required.");
+      return;
+    }
+
     if (validate()) {
       await submitPost(values, postId as string);
+      setOriginalValues(values); // Update originalValues after successful submission
     }
   };
 
@@ -102,7 +119,7 @@ const UpdatePostPage = () => {
       <h1 className="text-2xl font-bold mb-6">Update Post</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Cover Image Preview + Upload - Updated to match PostForm */}
+        {/* Cover Image Preview + Upload */}
         <div>
           <label className="block font-medium text-gray-700 mb-2">
             Cover Image
@@ -126,9 +143,7 @@ const UpdatePostPage = () => {
             {previewUrl && (
               <button
                 type="button"
-                onClick={() => {
-                  handleResetImage();
-                }}
+                onClick={handleResetImage}
                 className="text-red-500 hover:text-red-700"
               >
                 <X className="w-4 h-4" />
@@ -179,14 +194,6 @@ const UpdatePostPage = () => {
           <label className="block font-medium text-gray-700 mb-2">
             Category
           </label>
-          {/* <input
-            type="text"
-            name="category"
-            value={values.category ?? ""}
-            onChange={(e) => handleSetCategory(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          /> */}
-
           <SelectCategory
             categories={categories}
             value={values.category}
@@ -197,7 +204,6 @@ const UpdatePostPage = () => {
         {/* Tags */}
         <div>
           <label className="block font-medium text-gray-700 mb-2">Tags</label>
-
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -220,7 +226,6 @@ const UpdatePostPage = () => {
               Add
             </button>
           </div>
-
           <div className="flex flex-wrap gap-2">
             {values.tags.length === 0 && (
               <span className="text-sm text-gray-400">No tags yet.</span>
