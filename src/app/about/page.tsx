@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+
+// ---- Page-specific metadata ----
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "InsightPress is a personal project by Parfait MB, built to provide clear and valuable insights on web development, design, and modern technology trends.",
+};
 
 export default function AboutPage() {
   return (
@@ -43,7 +51,7 @@ export default function AboutPage() {
           <div className="w-24 h-24 relative rounded-full overflow-hidden border-2 border-blue-500 flex-shrink-0">
             <Image
               src="https://ik.imagekit.io/zzot6yvyh/face.jpeg?updatedAt=1756580263607"
-              alt="Me"
+              alt="founder"
               fill
               className="object-contain"
             />
