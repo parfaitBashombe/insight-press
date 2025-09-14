@@ -7,8 +7,8 @@ import {
   pageAtom,
   hasMoreAtom,
   loadingAtom,
+  queryAtom,
 } from "@/lib/store/post-atoms";
-import { Post } from "@/lib/types/post-data";
 
 const supabase = createClient();
 const POSTS_PER_PAGE = 6;
@@ -17,7 +17,6 @@ export const fetchPostsAtom = atom(null, async (get, set, reset = false) => {
   set(loadingAtom, true);
 
   let page = get(pageAtom);
-
   if (reset) {
     page = 1;
     set(pageAtom, 1);
@@ -26,11 +25,21 @@ export const fetchPostsAtom = atom(null, async (get, set, reset = false) => {
   const rangeStart = (page - 1) * POSTS_PER_PAGE;
   const rangeEnd = page * POSTS_PER_PAGE - 1;
 
-  const { data, error } = await supabase
+  const query = get(queryAtom).toLowerCase(); // get the search term
+
+  let supabaseQuery = supabase
     .from("posts")
     .select("*")
-    .order("created_at", { ascending: false })
-    .range(rangeStart, rangeEnd);
+    .order("created_at", { ascending: false });
+
+  // Apply search filter if query exists
+  if (query) {
+    supabaseQuery = supabaseQuery.or(
+      `title.ilike.%${query}%,content.ilike.%${query}%,author_name.ilike.%${query}%`
+    );
+  }
+
+  const { data, error } = await supabaseQuery.range(rangeStart, rangeEnd);
 
   if (error) {
     console.error(error);
@@ -43,7 +52,6 @@ export const fetchPostsAtom = atom(null, async (get, set, reset = false) => {
   if (reset) {
     set(postsAtom, fetchedPosts);
   } else {
-    // Merge and deduplicate
     const existingPosts = get(postsAtom);
     const mergedPosts = [...existingPosts, ...fetchedPosts];
     const uniquePosts = Array.from(
@@ -53,6 +61,5 @@ export const fetchPostsAtom = atom(null, async (get, set, reset = false) => {
   }
 
   set(hasMoreAtom, fetchedPosts.length === POSTS_PER_PAGE);
-
   set(loadingAtom, false);
 });
