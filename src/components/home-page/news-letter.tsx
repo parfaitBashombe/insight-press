@@ -1,7 +1,13 @@
 import { Mail } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 const NewsLetter = () => {
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.info("Subscription feature is still in development!");
+  };
+
   return (
     <section className="relative">
       <div className="relative bg-white border border-gray-200 rounded-3xl p-8 md:p-16 shadow-2xl overflow-hidden">
@@ -19,7 +25,10 @@ const NewsLetter = () => {
             straight to your inbox. No spam, we promise.
           </p>
 
-          <form className="mt-8 flex flex-col sm:flex-row items-center justify-center max-w-lg mx-auto gap-4">
+          <form
+            onSubmit={handleSubscribe}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center max-w-lg mx-auto gap-4"
+          >
             <input
               type="email"
               placeholder="Enter your email address"
@@ -34,7 +43,7 @@ const NewsLetter = () => {
           </form>
 
           <p className="text-gray-500 text-sm mt-5">
-            Join our community of thousands of readers.
+            Join our community of readers.
           </p>
         </div>
       </div>

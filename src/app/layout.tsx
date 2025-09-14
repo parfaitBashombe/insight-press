@@ -40,14 +40,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-zinc-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-100 h-full`}
       >
         <Provider>
-          <Navbar />
-          <main className="flex-grow bg-zinc-100">{children}</main>
-          <Footer />
+          {/* Flex wrapper fills viewport */}
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+
+            {/* Main content grows to push footer down */}
+            <main className="flex-1">
+              <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
+            </main>
+
+            {/* Footer always at bottom */}
+            <Footer />
+          </div>
+
           <Toaster
             position="top-center"
             expand

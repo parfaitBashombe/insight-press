@@ -27,6 +27,11 @@ const links = [
   { name: "Contact", href: "/contact" },
 ];
 
+const legalLinks = [
+  { name: "Terms & Conditions", href: "/terms" },
+  { name: "Privacy Policy", href: "/privacy" },
+];
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useAtom(userAtom);
@@ -37,9 +42,7 @@ export default function Navbar() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (!user) {
-      fetchUser();
-    }
+    if (!user) fetchUser();
   }, []);
 
   const fetchUser = async () => {
@@ -61,9 +64,7 @@ export default function Navbar() {
         .eq("id", auth_id)
         .single();
 
-      if (data) {
-        return data as UserData;
-      }
+      if (data) return data as UserData;
     } catch (error) {
       console.dir(error);
     } finally {
@@ -90,11 +91,7 @@ export default function Navbar() {
   const firstSegment = "/" + pathname.split("/")[1];
 
   return (
-    <nav
-      className={
-        "sticky top-0 z-50 transition-all duration-300 bg-white backdrop-blur-xl border-b border-gray-200/80 shadow-sm"
-      }
-    >
+    <nav className="sticky top-0 z-50 transition-all duration-300 bg-white backdrop-blur-xl border-b border-gray-200/80 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -110,27 +107,42 @@ export default function Navbar() {
             {(userData?.roles.name === "admin"
               ? [...links, { name: "Admin", href: "/admin" }]
               : links
-            ).map((link) => {
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
-                    firstSegment === link.href
-                      ? "text-blue-600 font-semibold"
-                      : ""
+            ).map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
+                  firstSegment === link.href
+                    ? "text-blue-600 font-semibold"
+                    : ""
+                }`}
+              >
+                {link.name}
+                <span
+                  className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
+                    firstSegment === link.href ? "scale-x-100" : ""
                   }`}
-                >
-                  {link.name}
-                  <span
-                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
-                      firstSegment === link.href ? "scale-x-100" : ""
-                    }`}
-                  ></span>
-                </Link>
-              );
-            })}
+                ></span>
+              </Link>
+            ))}
 
+            {/* Legal Dropdown for Desktop */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="relative text-gray-600 hover:text-blue-600 font-medium">
+                  Legal <span className="ml-1">▾</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {legalLinks.map((link) => (
+                  <DropdownMenuItem key={link.href}>
+                    <Link href={link.href}>{link.name}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* User Section */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -187,32 +199,32 @@ export default function Navbar() {
           />
           <div className="absolute right-0 top-0 h-[100vh] w-3/4 bg-white shadow-lg px-6 py-8 flex flex-col justify-between transform transition-transform duration-300">
             <div className="flex flex-col space-y-6">
+              {/* Include legal links with other links on mobile */}
               {(userData?.roles.name === "admin"
-                ? [...links, { name: "Admin", href: "/admin" }]
-                : links
-              ).map((link) => {
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
-                      firstSegment === link.href
-                        ? "text-blue-600 font-semibold"
-                        : ""
+                ? [...links, { name: "Admin", href: "/admin" }, ...legalLinks]
+                : [...links, ...legalLinks]
+              ).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`relative text-gray-600 hover:text-blue-600 transition-colors group ${
+                    firstSegment === link.href
+                      ? "text-blue-600 font-semibold"
+                      : ""
+                  }`}
+                >
+                  {link.name}
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
+                      firstSegment === link.href ? "scale-x-100" : ""
                     }`}
-                  >
-                    {link.name}
-                    <span
-                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ${
-                        firstSegment === link.href ? "scale-x-100" : ""
-                      }`}
-                    ></span>
-                  </Link>
-                );
-              })}
+                  ></span>
+                </Link>
+              ))}
             </div>
 
+            {/* User Section */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
