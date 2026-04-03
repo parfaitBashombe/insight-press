@@ -186,9 +186,7 @@ const PostCard = ({ post, delay = 0 }: { post: Post; delay?: number }) => {
   return (
     <article
       className="group bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-50/80 transition-all duration-500 cursor-pointer flex flex-col"
-      style={{
-        animationDelay: `${delay}ms`,
-      }}
+      style={{ animationDelay: `${delay}ms` }}
     >
       <div className="relative overflow-hidden h-44 bg-[#F0EDE7] shrink-0">
         <img
@@ -323,7 +321,7 @@ const BlogsPage = () => {
         </div>
         <div className="max-w-6xl mx-auto relative">
           <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase mb-3">
-            The Inscribe Journal
+            The Insight Press Journal
           </p>
           <h1
             className="text-5xl sm:text-6xl font-bold text-white mb-4 leading-tight"
@@ -485,7 +483,7 @@ const BlogsPage = () => {
             </p>
           </div>
           <Link
-            to="/signup"
+            to="/verify-request"
             className="shrink-0 inline-flex items-center gap-2.5 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-8 py-4 rounded-full transition-all duration-300 hover:shadow-xl hover:shadow-amber-400/25 hover:-translate-y-0.5 text-sm"
           >
             Apply for Verification

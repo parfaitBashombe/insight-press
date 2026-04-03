@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FaShieldAlt,
@@ -13,17 +13,45 @@ import {
   FaStar,
 } from "react-icons/fa";
 
+const useInView = (threshold = 0.12) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+};
+
 const HomePage = () => {
   useEffect(() => {
-    const existingFonts = document.getElementById("inscribe-fonts");
+    const existingFonts = document.getElementById("insight-press-fonts");
     if (existingFonts) return;
     const fontLink = document.createElement("link");
-    fontLink.id = "inscribe-fonts";
+    fontLink.id = "insight-press-fonts";
     fontLink.rel = "stylesheet";
     fontLink.href =
       "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap";
     document.head.appendChild(fontLink);
   }, []);
+
+  const { ref: featuresRef, inView: featuresInView } = useInView();
+  const { ref: stepsRef, inView: stepsInView } = useInView();
+  const { ref: blogsRef, inView: blogsInView } = useInView();
+  const { ref: testimonialsRef, inView: testimonialsInView } = useInView();
+  const { ref: statsRef, inView: statsInView } = useInView();
+  const { ref: heroTextRef, inView: heroTextInView } = useInView(0.05);
 
   const platformFeatures = [
     {
@@ -136,7 +164,7 @@ const HomePage = () => {
   const authorTestimonials = [
     {
       quote:
-        "I've tried a dozen platforms. Inscribe is the first that felt like it was designed for serious writers — not just content farms. The verification system gives readers confidence they rarely get elsewhere.",
+        "I've tried a dozen platforms. Insight Press is the first that felt like it was designed for serious writers — not just content farms. The verification system gives readers confidence they rarely get elsewhere.",
       name: "Daniel Achebe",
       role: "Independent Journalist",
       initials: "DA",
@@ -152,7 +180,7 @@ const HomePage = () => {
     },
     {
       quote:
-        "I love that the platform curates quality. Knowing every author is verified makes Inscribe feel like a professional publication, not just another blog site.",
+        "I love that the platform curates quality. Knowing every author is verified makes Insight Press feel like a professional publication, not just another blog site.",
       name: "Kwame Asante",
       role: "Marketing Strategist",
       initials: "KA",
@@ -169,7 +197,6 @@ const HomePage = () => {
 
   return (
     <div className="font-dm-sans">
-      {/* Hero Section */}
       <section className="relative min-h-screen bg-[#0C0C0C] flex items-center overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 rounded-full bg-amber-500/5 blur-[120px]" />
@@ -190,14 +217,18 @@ const HomePage = () => {
           />
         </div>
         <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-20 w-full">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 bg-white/6 border border-white/10 rounded-full px-4 py-2 mb-10 backdrop-blur-sm animate-fade-in">
+          <div ref={heroTextRef} className="max-w-4xl">
+            <div
+              className={`inline-flex items-center gap-2 bg-white/6 border border-white/10 rounded-full px-4 py-2 mb-10 backdrop-blur-sm transition-all duration-700 ${heroTextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               <span className="text-white/70 text-xs font-medium tracking-widest uppercase">
                 Verified Authors Platform
               </span>
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.05] tracking-tight mb-8 font-playfair">
+            <h1
+              className={`text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.05] tracking-tight mb-8 font-playfair transition-all duration-700 delay-100 ${heroTextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            >
               Write with{" "}
               <span className="relative inline-block">
                 <span className="relative z-10 text-amber-400">Authority.</span>
@@ -206,12 +237,16 @@ const HomePage = () => {
               <br />
               Publish with <span className="text-white/30">Confidence.</span>
             </h1>
-            <p className="text-white/50 text-lg sm:text-xl leading-relaxed mb-12 max-w-2xl font-light">
-              Inscribe is a curated publishing platform where every voice is
-              verified. Apply to become an author, get approved, and start
+            <p
+              className={`text-white/50 text-lg sm:text-xl leading-relaxed mb-12 max-w-2xl font-light transition-all duration-700 delay-200 ${heroTextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            >
+              Insight Press is a curated publishing platform where every voice
+              is verified. Apply to become an author, get approved, and start
               reaching readers who trust what they read.
             </p>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div
+              className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-700 delay-300 ${heroTextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            >
               <Link
                 to="/signup"
                 className="group inline-flex items-center gap-3 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/25 hover:-translate-y-0.5 text-base"
@@ -229,7 +264,9 @@ const HomePage = () => {
                 Explore Blogs
               </Link>
             </div>
-            <div className="mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10">
+            <div
+              className={`mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 transition-all duration-700 delay-500 ${heroTextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            >
               <div className="flex -space-x-3">
                 {["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B"].map(
                   (color, index) => (
@@ -304,12 +341,11 @@ const HomePage = () => {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-[#F8F6F1] to-transparent pointer-events-none" />
       </section>
 
-      {/* Features Section */}
       <section className="bg-[#F8F6F1] py-28 px-6" id="about">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-xl mb-16">
             <p className="text-amber-600 text-xs font-semibold tracking-widest uppercase mb-4">
-              Why Inscribe
+              Why Insight Press
             </p>
             <h2 className="text-4xl sm:text-5xl font-bold text-[#1A1A1A] leading-tight mb-4 font-playfair">
               A platform built for serious writers.
@@ -319,11 +355,15 @@ const HomePage = () => {
               readership, and make publishing feel effortless.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {platformFeatures.map((feature) => (
+          <div
+            ref={featuresRef}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
+            {platformFeatures.map((feature, i) => (
               <div
                 key={feature.title}
-                className="group bg-white rounded-2xl p-7 border border-[#E8E4DC] hover:border-amber-200 hover:shadow-xl hover:shadow-amber-100/60 transition-all duration-500 cursor-default"
+                className={`group bg-white rounded-2xl p-7 border border-[#E8E4DC] hover:border-amber-200 hover:shadow-xl hover:shadow-amber-100/60 transition-all duration-500 cursor-default ${featuresInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                style={{ transitionDelay: `${i * 80}ms` }}
               >
                 <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-5 group-hover:bg-amber-400 group-hover:border-amber-400 group-hover:text-[#0C0C0C] transition-all duration-300">
                   {feature.icon}
@@ -340,7 +380,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="bg-[#0C0C0C] py-28 px-6 overflow-hidden relative">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full bg-amber-500/5 blur-[100px]" />
@@ -354,16 +393,20 @@ const HomePage = () => {
               From zero to published in three steps.
             </h2>
             <p className="text-white/40 text-lg leading-relaxed">
-              The path to becoming a verified Inscribe author is designed to be
-              smooth, fast, and transparent.
+              The path to becoming a verified Insight Press author is designed
+              to be smooth, fast, and transparent.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          <div
+            ref={stepsRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 relative"
+          >
             <div className="hidden md:block absolute top-10 left-[calc(16.67%+32px)] right-[calc(16.67%+32px)] h-px bg-linear-to-r from-amber-400/30 via-amber-400/60 to-amber-400/30" />
-            {onboardingSteps.map((step) => (
+            {onboardingSteps.map((step, i) => (
               <div
                 key={step.number}
-                className="relative flex flex-col items-start"
+                className={`relative flex flex-col items-start transition-all duration-700 ${stepsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                style={{ transitionDelay: `${i * 150}ms` }}
               >
                 <div className="relative mb-8">
                   <div className="w-20 h-20 rounded-2xl bg-white/4 border border-white/10 flex items-center justify-center">
@@ -397,7 +440,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Blogs */}
       <section className="bg-[#F8F6F1] py-28 px-6" id="blogs">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16">
@@ -416,11 +458,12 @@ const HomePage = () => {
               View all blogs <FaArrowRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredBlogPosts.map((blogPost) => (
+          <div ref={blogsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredBlogPosts.map((blogPost, i) => (
               <article
                 key={blogPost.title}
-                className="group bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-50 transition-all duration-500 cursor-pointer flex flex-col"
+                className={`group bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-50 transition-all duration-500 cursor-pointer flex flex-col ${blogsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                style={{ transitionDelay: `${i * 120}ms` }}
               >
                 <div className="relative overflow-hidden h-48 bg-[#F0EDE7] shrink-0">
                   <img
@@ -473,7 +516,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="bg-white py-28 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-xl mx-auto mb-16">
@@ -484,11 +526,15 @@ const HomePage = () => {
               Authors who made the leap.
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {authorTestimonials.map((testimonial) => (
+          <div
+            ref={testimonialsRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            {authorTestimonials.map((testimonial, i) => (
               <div
                 key={testimonial.name}
-                className="bg-[#F8F6F1] border border-[#E8E4DC] rounded-2xl p-8 flex flex-col transition-all duration-700 hover:shadow-xl hover:shadow-amber-100/50 hover:-translate-y-1"
+                className={`bg-[#F8F6F1] border border-[#E8E4DC] rounded-2xl p-8 flex flex-col transition-all duration-700 hover:shadow-xl hover:shadow-amber-100/50 hover:-translate-y-1 ${testimonialsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                style={{ transitionDelay: `${i * 120}ms` }}
               >
                 <div className="flex items-center gap-1 mb-5">
                   {[...Array(testimonial.stars)].map((_, index) => (
@@ -522,7 +568,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="bg-[#0C0C0C] py-28 px-6 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-100 rounded-full bg-amber-500/8 blur-[100px]" />
@@ -568,9 +613,16 @@ const HomePage = () => {
               Learn more about the process
             </Link>
           </div>
-          <div className="mt-20 pt-12 border-t border-white/6 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {platformStatistics.map((stat) => (
-              <div key={stat.label} className="text-center">
+          <div
+            ref={statsRef}
+            className="mt-20 pt-12 border-t border-white/6 grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {platformStatistics.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={`text-center transition-all duration-700 ${statsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+                style={{ transitionDelay: `${i * 100}ms` }}
+              >
                 <div className="text-3xl font-bold text-white mb-1 font-playfair">
                   {stat.value}
                 </div>

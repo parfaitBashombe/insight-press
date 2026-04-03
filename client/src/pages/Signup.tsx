@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { z } from "zod";
 import {
   FaPen,
-  FaShieldAlt,
+  FaFeatherAlt,
   FaEye,
   FaEyeSlash,
   FaCheckCircle,
@@ -10,27 +11,44 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 
-/* ─────────────────────────────────────────────
-   TYPES
-───────────────────────────────────────────── */
-interface FormState {
+const signUpSchema = z
+  .object({
+    fullName: z.string().min(1, "Full name is required"),
+    email: z.string().min(1, "Email is required").email("Enter a valid email"),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .min(8, "At least 8 characters required"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    agreed: z.boolean().refine((val) => val === true, {
+      message: "You must accept the terms",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type FormState = {
   fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
   agreed: boolean;
-}
-
+};
+type FormErrors = Partial<Record<keyof FormState, string>>;
 type Status = "idle" | "submitting" | "success";
 
 /* ─────────────────────────────────────────────
    PASSWORD STRENGTH
 ───────────────────────────────────────────── */
-function getStrength(pw: string): {
+const getStrength = (
+  pw: string,
+): {
   level: number;
   label: string;
   color: string;
-} {
+} => {
   let score = 0;
   if (pw.length >= 8) score++;
   if (/[A-Z]/.test(pw)) score++;
@@ -40,11 +58,18 @@ function getStrength(pw: string): {
   if (score <= 1) return { level: score, label: "Weak", color: "#EF4444" };
   if (score <= 3) return { level: score, label: "Fair", color: "#F59E0B" };
   return { level: score, label: "Strong", color: "#10B981" };
-}
+};
 
 /* ─────────────────────────────────────────────
    PAGE
 ───────────────────────────────────────────── */
+const PERKS = [
+  "Verified author badge on every post",
+  "Built-in audience discovery tools",
+  "Personal analytics dashboard",
+  "Direct editorial support",
+];
+
 const SignUpPage = () => {
   const [form, setForm] = useState<FormState>({
     fullName: "",
@@ -55,29 +80,25 @@ const SignUpPage = () => {
   });
   const [showPw, setShowPw] = useState(false);
   const [showCPw, setShowCPw] = useState(false);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof FormState, string>>
-  >({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<Status>("idle");
 
   const strength = getStrength(form.password);
 
+  /* ── Zod validation ── */
   const validate = (): boolean => {
-    const e: Partial<Record<keyof FormState, string>> = {};
-    if (!form.fullName.trim()) e.fullName = "Full name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email";
-    if (!form.password) e.password = "Password is required";
-    else if (form.password.length < 8)
-      e.password = "At least 8 characters required";
-    if (!form.confirmPassword)
-      e.confirmPassword = "Please confirm your password";
-    else if (form.password !== form.confirmPassword)
-      e.confirmPassword = "Passwords do not match";
-    if (!form.agreed) e.agreed = "You must accept the terms";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    const result = signUpSchema.safeParse(form);
+    if (result.success) {
+      setErrors({});
+      return true;
+    }
+    const fieldErrors: FormErrors = {};
+    for (const issue of result.error.issues) {
+      const field = issue.path[0] as keyof FormState;
+      if (!fieldErrors[field]) fieldErrors[field] = issue.message;
+    }
+    setErrors(fieldErrors);
+    return false;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,20 +123,13 @@ const SignUpPage = () => {
   const inputNormal = `${inputBase} border-white/[0.1] focus:border-amber-400/60 focus:bg-white/[0.09] focus:ring-1 focus:ring-amber-400/20`;
   const inputError = `${inputBase} border-red-400/50 bg-red-500/5 focus:border-red-400/70`;
 
-  const PERKS = [
-    "Verified author badge on every post",
-    "Built-in audience discovery tools",
-    "Personal analytics dashboard",
-    "Direct editorial support",
-  ];
-
   return (
     <div
-      className="min-h-screen bg-[#0C0C0C] flex"
+      className="min-h-screen bg-[#0C0C0C] flex flex-col lg:flex-row"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* ── Left panel — brand ── */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 relative overflow-hidden border-r border-white/6">
+      {/* ── Left panel (desktop only) ──────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] shrink-0 flex-col justify-between p-10 xl:p-14 relative overflow-hidden border-r border-white/6">
         {/* Background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full bg-amber-500/8 blur-[100px]" />
@@ -141,18 +155,20 @@ const SignUpPage = () => {
             className="text-white text-xl font-semibold"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Inscribe
+            Insight Press
           </span>
         </Link>
 
         {/* Center content */}
         <div className="relative z-10">
+          {/* Badge — FaFeatherAlt replaces FaShieldAlt */}
           <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-full px-4 py-2 mb-8">
-            <FaShieldAlt size={12} className="text-amber-400" />
+            <FaFeatherAlt size={11} className="text-amber-400" />
             <span className="text-amber-400 text-xs font-semibold tracking-widest uppercase">
               Verified Authors Platform
             </span>
           </div>
+
           <h2
             className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-5"
             style={{ fontFamily: "'Playfair Display', serif" }}
@@ -178,14 +194,14 @@ const SignUpPage = () => {
             ))}
           </ul>
 
-          {/* Testimonial mini */}
-          <div className="mt-12 bg-white/4 border border-white/8 rounded-2xl p-6">
+          {/* Testimonial */}
+          <div className="mt-10 xl:mt-12 bg-white/4 border border-white/8 rounded-2xl p-5 xl:p-6">
             <p className="text-white/60 text-sm leading-relaxed mb-4">
               "Getting verified took less than a day. My first post got more
               engagement than anything I'd published elsewhere."
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-xs font-bold text-[#0C0C0C]">
+              <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-xs font-bold text-[#0C0C0C] shrink-0">
                 SR
               </div>
               <div>
@@ -200,19 +216,19 @@ const SignUpPage = () => {
           </div>
         </div>
 
-        {/* Bottom */}
+        {/* Footer */}
         <p className="text-white/20 text-xs relative z-10">
-          © {new Date().getFullYear()} Inscribe. All rights reserved.
+          © {new Date().getFullYear()} Insight Press. All rights reserved.
         </p>
       </div>
 
-      {/* ── Right panel — form ── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      {/* ── Right panel (form) ───────────────────────────────────────────────── */}
+      <div className="flex-1 flex items-start sm:items-center justify-center px-5 sm:px-8 py-10 lg:py-12 lg:overflow-y-auto">
+        <div className="w-full max-w-sm sm:max-w-md">
           {/* Mobile logo */}
           <Link
             to="/"
-            className="flex lg:hidden items-center gap-2.5 mb-10 group w-fit"
+            className="flex lg:hidden items-center gap-2.5 mb-7 group w-fit"
           >
             <span className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center">
               <FaPen size={12} className="text-[#0C0C0C]" />
@@ -221,33 +237,60 @@ const SignUpPage = () => {
               className="text-white text-lg font-semibold"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Inscribe
+              Insight Press
             </span>
           </Link>
 
+          {/* Mobile perks strip */}
+          <div className="lg:hidden mb-6 p-4 bg-white/3 border border-white/[0.07] rounded-2xl">
+            <div className="inline-flex items-center gap-1.5 mb-3">
+              <FaFeatherAlt size={9} className="text-amber-400" />
+              <span className="text-amber-400 text-[10px] font-semibold tracking-widest uppercase">
+                Verified Authors Platform
+              </span>
+            </div>
+            <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
+              {PERKS.map((perk) => (
+                <li key={perk} className="flex items-start gap-1.5">
+                  <FaCheck
+                    size={8}
+                    className="text-amber-400 mt-0.5 shrink-0"
+                  />
+                  <span className="text-white/45 text-[11px] leading-snug">
+                    {perk}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {status === "success" ? (
             /* ── Success ── */
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
-                <FaCheckCircle size={36} className="text-green-400" />
+            <div className="text-center py-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-5 sm:mb-6">
+                <FaCheckCircle size={28} className="text-green-400 sm:hidden" />
+                <FaCheckCircle
+                  size={36}
+                  className="text-green-400 hidden sm:block"
+                />
               </div>
               <h2
-                className="text-white text-3xl font-bold mb-3"
+                className="text-white text-2xl sm:text-3xl font-bold mb-2 sm:mb-3"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Account created!
               </h2>
               <p className="text-white/40 text-sm leading-relaxed mb-3 max-w-xs mx-auto">
                 We've sent a confirmation email to{" "}
-                <span className="text-white/70">{form.email}</span>.
+                <span className="text-white/70 break-all">{form.email}</span>.
               </p>
-              <p className="text-white/40 text-sm max-w-xs mx-auto mb-10">
+              <p className="text-white/40 text-sm max-w-xs mx-auto mb-8 sm:mb-10">
                 Once confirmed, our team will begin reviewing your verification
                 application. You'll hear back within 24 hours.
               </p>
               <Link
                 to="/signin"
-                className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-semibold px-8 py-3.5 rounded-full transition-all duration-200 text-sm"
+                className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-semibold px-7 sm:px-8 py-3 sm:py-3.5 rounded-full transition-all duration-200 text-sm"
               >
                 Go to Sign In
                 <FaArrowRight size={12} />
@@ -256,9 +299,9 @@ const SignUpPage = () => {
           ) : (
             /* ── Form ── */
             <>
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <h1
-                  className="text-white text-3xl font-bold mb-2"
+                  className="text-white text-2xl sm:text-3xl font-bold mb-2"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   Create your account
@@ -274,7 +317,11 @@ const SignUpPage = () => {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              <form
+                onSubmit={handleSubmit}
+                noValidate
+                className="space-y-4 sm:space-y-5"
+              >
                 {/* Full Name */}
                 <div>
                   <label className="block text-xs font-semibold text-white/50 mb-2 tracking-wide uppercase">
@@ -309,6 +356,7 @@ const SignUpPage = () => {
                     placeholder="you@example.com"
                     className={errors.email ? inputError : inputNormal}
                     autoComplete="email"
+                    inputMode="email"
                   />
                   {errors.email && (
                     <p className="text-red-400 text-xs mt-1.5">
@@ -335,7 +383,8 @@ const SignUpPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowPw(!showPw)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                      aria-label={showPw ? "Hide password" : "Show password"}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 touch-manipulation"
                     >
                       {showPw ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                     </button>
@@ -387,7 +436,8 @@ const SignUpPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowCPw(!showCPw)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                      aria-label={showCPw ? "Hide password" : "Show password"}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 touch-manipulation"
                     >
                       {showCPw ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                     </button>
@@ -424,7 +474,7 @@ const SignUpPage = () => {
                         )}
                       </div>
                     </div>
-                    <span className="text-white/40 text-sm leading-relaxed">
+                    <span className="text-white/40 text-sm leading-relaxed select-none">
                       I agree to the{" "}
                       <a
                         href="#"
@@ -448,10 +498,10 @@ const SignUpPage = () => {
                   )}
                 </div>
 
-                {/* Verification notice */}
+                {/* Verification notice — FaFeatherAlt replaces FaShieldAlt */}
                 <div className="flex items-start gap-3 bg-amber-400/8 border border-amber-400/15 rounded-xl px-4 py-3.5">
-                  <FaShieldAlt
-                    size={13}
+                  <FaFeatherAlt
+                    size={12}
                     className="text-amber-400 mt-0.5 shrink-0"
                   />
                   <p className="text-white/50 text-xs leading-relaxed">
@@ -467,7 +517,7 @@ const SignUpPage = () => {
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className="w-full inline-flex items-center justify-center gap-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-[#0C0C0C] font-bold px-8 py-4 rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/25 hover:-translate-y-0.5 text-sm mt-2"
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] disabled:opacity-60 text-[#0C0C0C] font-bold px-8 py-4 rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/25 hover:-translate-y-0.5 text-sm mt-1 touch-manipulation"
                 >
                   {status === "submitting" ? (
                     <>

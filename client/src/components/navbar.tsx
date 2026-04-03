@@ -34,7 +34,7 @@ const Logo = () => (
       className="text-white text-xl font-bold tracking-tight"
       style={{ fontFamily: "'Playfair Display', serif" }}
     >
-      Inscribe
+      Insight Press
     </span>
   </Link>
 );
@@ -67,7 +67,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[50] transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? "bg-[#0C0C0C] border-b border-white/10 shadow-2xl"
           : "bg-transparent"
@@ -114,7 +114,7 @@ const Navbar = () => {
       </div>
 
       <div
-        className={`fixed inset-0 z-[100] lg:hidden transition-[visibility] duration-500 ${
+        className={`fixed inset-0 z-100 lg:hidden transition-[visibility] duration-500 ${
           open ? "visible" : "invisible delay-500"
         }`}
       >
@@ -126,7 +126,7 @@ const Navbar = () => {
         />
 
         <div
-          className={`absolute top-0 left-0 h-full w-[280px] sm:w-[320px] bg-[#0C0C0C] border-r border-white/10 shadow-2xl transform transition-transform duration-500 ease-in-out flex flex-col ${
+          className={`absolute top-0 left-0 h-full w-70 sm:w-[320px] bg-[#0C0C0C] border-r border-white/10 shadow-2xl transform transition-transform duration-500 ease-in-out flex flex-col ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -160,7 +160,7 @@ const Navbar = () => {
             </nav>
           </div>
 
-          <div className="mt-auto p-8 border-t border-white/10 bg-white/[0.02] flex flex-col gap-4">
+          <div className="mt-auto p-8 border-t border-white/10 bg-white/2 flex flex-col gap-4">
             <Link
               to="/signin"
               className="flex items-center justify-center w-full py-4 rounded-xl border border-white/10 text-white font-semibold text-sm hover:bg-white/5 transition-colors"
