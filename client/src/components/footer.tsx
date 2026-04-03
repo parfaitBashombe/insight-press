@@ -53,7 +53,6 @@ const Footer: React.FC = () => {
     >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          {/* Brand Identity */}
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 mb-4 group w-fit">
               <span className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -63,7 +62,7 @@ const Footer: React.FC = () => {
                 className="text-white text-lg font-semibold tracking-tight"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Inscribe
+                Insight Press
               </span>
             </Link>
             <p className="text-white/30 text-sm leading-relaxed">
@@ -71,7 +70,6 @@ const Footer: React.FC = () => {
             </p>
           </div>
 
-          {/* Navigation Sections */}
           {FOOTER_NAVIGATION.map((section) => (
             <div key={section.heading}>
               <h4 className="text-white/60 text-xs font-semibold tracking-widest uppercase mb-5">
@@ -93,10 +91,9 @@ const Footer: React.FC = () => {
           ))}
         </div>
 
-        {/* Bottom Utility Bar */}
         <div className="pt-8 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/20 text-sm">
-            © {currentYear} Inscribe. All rights reserved.
+            © {currentYear} Insight Press. All rights reserved.
           </p>
           <div className="flex items-center gap-2 text-white/20 text-sm">
             <BsShieldCheck size={13} className="text-amber-400/50" />
