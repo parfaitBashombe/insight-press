@@ -13,12 +13,13 @@ import SignInPage from "./pages/Signin";
 import SignUpPage from "./pages/Signup";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
+import DashboardPage from "./pages/Dashboard";
 
 const App: React.FC = () => {
   const location = useLocation();
 
   // Define paths where Navbar and Footer should NOT be displayed
-  const authRoutes = ["/signin", "/signup", "/verify-request"];
+  const authRoutes = ["/signin", "/signup", "/verify-request", "/dashboard"];
   const shouldHideLayout = authRoutes.includes(location.pathname);
 
   return (
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
       </main>
 

@@ -130,7 +130,7 @@ const ContactPage: React.FC = () => {
     <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <section className="bg-[#0C0C0C] pt-24 sm:pt-32 pb-16 sm:pb-20 px-5 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 right-1/3 -translate-y-1/2 w-[500px] h-[400px] rounded-full bg-amber-500/5 blur-[100px]" />
+          <div className="absolute top-1/2 right-1/3 -translate-y-1/2 w-125 h-100 rounded-full bg-amber-500/5 blur-[100px]" />
         </div>
         <div className="max-w-4xl mx-auto relative">
           <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase mb-4">
