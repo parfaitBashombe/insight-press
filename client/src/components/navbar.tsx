@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { FaBars, FaChevronRight, FaPen, FaTimes } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 interface NavLink {
   label: string;
-  href: string;
+  to: string;
 }
 
 const NAV_LINKS: NavLink[] = [
-  { label: "Home", href: "#" },
-  { label: "Blogs", href: "#blogs" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", to: "/" },
+  { label: "Blogs", to: "/blogs" },
+  { label: "About", to: "/about" },
+  { label: "Contact", to: "/contact" },
 ];
 
 const useScrolled = (threshold = 20) => {
@@ -36,8 +37,7 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-17 flex items-center justify-between">
-        {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5 group">
+        <Link to="/" className="flex items-center gap-2.5 group">
           <span className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
             <FaPen size={12} className="text-[#0C0C0C]" />
           </span>
@@ -47,39 +47,36 @@ const Navbar = () => {
           >
             Inscribe
           </span>
-        </a>
+        </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
+              to={link.to}
               className="text-white/60 hover:text-white text-sm font-medium tracking-wide transition-colors duration-200"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
-        {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <a
-            href="#"
+          <Link
+            to="/signin"
             className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 px-3 py-1.5"
           >
             Sign In
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/verify-request"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:shadow-lg hover:shadow-amber-400/20 hover:-translate-y-px"
           >
             Get Verified
             <FaChevronRight size={12} />
-          </a>
+          </Link>
         </div>
 
-        {/* Mobile Toggle */}
         <button
           className="md:hidden text-white/70 hover:text-white transition-colors"
           onClick={() => setOpen(!open)}
@@ -89,7 +86,6 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -97,26 +93,31 @@ const Navbar = () => {
       >
         <div className="bg-[#0C0C0C]/98 backdrop-blur-md border-t border-white/6 px-6 py-5 flex flex-col gap-4">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
+              to={link.to}
               className="text-white/70 hover:text-white text-sm font-medium py-1 transition-colors"
               onClick={() => setOpen(false)}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
           <div className="pt-2 border-t border-white/8 flex flex-col gap-3">
-            <a href="#" className="text-white/60 text-sm font-medium py-1">
+            <Link
+              to="/signin"
+              className="text-white/60 text-sm font-medium py-1"
+              onClick={() => setOpen(false)}
+            >
               Sign In
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/verify-request"
               className="inline-flex items-center justify-center gap-2 bg-amber-400 text-[#0C0C0C] text-sm font-semibold px-5 py-3 rounded-full"
+              onClick={() => setOpen(false)}
             >
               Get Verified
               <FaChevronRight size={12} />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
