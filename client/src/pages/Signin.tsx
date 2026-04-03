@@ -415,7 +415,7 @@ const SignInPage = () => {
                 <p className="text-white/25 text-sm mb-4">New to Inscribe?</p>
                 <Link
                   to="/signup"
-                  className="inline-flex items-center gap-2 border border-white/12 hover:border-white/25 text-white/60 hover:text-white font-medium px-6 py-3 rounded-full transition-all duration-200 text-sm hover:bg-white/[0.04]"
+                  className="inline-flex items-center gap-2 border border-white/12 hover:border-white/25 text-white/60 hover:text-white font-medium px-6 py-3 rounded-full transition-all duration-200 text-sm hover:bg-white/4"
                 >
                   Create a free account
                   <FaArrowRight size={11} />
