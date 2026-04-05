@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/static-components */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import {
   FaPen,
   FaFeatherAlt,
@@ -26,9 +26,11 @@ import {
   FaPaperPlane,
   FaTrash,
   FaEllipsis,
+  FaComment,
+  FaImage,
 } from "react-icons/fa6";
 
-type View = "overview" | "new-post" | "my-posts" | "analytics";
+type View = "overview" | "new-post" | "my-posts" | "analytics" | "settings" | "comments" | "media";
 
 const STATS = [
   {
@@ -104,6 +106,19 @@ const POSTS = [
   },
 ];
 
+const COMMENTS = [
+  { id: 1, author: "Jane Doe", content: "This structure really changed how I think about layout. Thanks for sharing!", postTitle: "The Invisible Grid: How Whitespace Shapes Reader Trust", date: "Apr 3, 2026", status: "approved" },
+  { id: 2, author: "John Smith", content: "I somewhat disagree, density has its place in data-heavy apps.", postTitle: "The Invisible Grid: How Whitespace Shapes Reader Trust", date: "Apr 2, 2026", status: "pending" },
+  { id: 3, author: "Sarah Lee", content: "Great read! Looking forward to part 2.", postTitle: "Building for the Long Run: Why Boring Tech Wins", date: "Mar 25, 2026", status: "approved" },
+];
+
+const MEDIA = [
+  { id: 1, url: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=400", name: "workspace-hero.jpg", size: "1.2 MB", date: "Mar 10, 2026" },
+  { id: 2, url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400", name: "code-snippet.png", size: "2.4 MB", date: "Mar 12, 2026" },
+  { id: 3, url: "https://images.unsplash.com/photo-1507238691740-187a552e4ec7?auto=format&fit=crop&q=80&w=400", name: "meeting-notes.jpg", size: "840 KB", date: "Mar 20, 2026" },
+  { id: 4, url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=400", name: "server-rack.jpg", size: "3.1 MB", date: "Apr 1, 2026" },
+];
+
 const ANALYTICS_DATA = [
   { month: "Oct", views: 1200 },
   { month: "Nov", views: 1800 },
@@ -174,6 +189,7 @@ const DashboardPage = () => {
   const [publishedToast, setPublishedToast] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const [postMenuOpen, setPostMenuOpen] = useState<number | null>(null);
+  const [postFilter, setPostFilter] = useState<"All" | "Published" | "Drafts">("All");
 
   const wordCount = postContent
     .replace(/<[^>]*>/g, "")
@@ -210,6 +226,8 @@ const DashboardPage = () => {
     { icon: <FaHouse size={14} />, label: "Overview", id: "overview" },
     { icon: <FaPlus size={14} />, label: "New Post", id: "new-post" },
     { icon: <FaList size={14} />, label: "My Posts", id: "my-posts" },
+    { icon: <FaComment size={14} />, label: "Comments", id: "comments" },
+    { icon: <FaImage size={14} />, label: "Media Library", id: "media" },
     { icon: <FaChartLine size={14} />, label: "Analytics", id: "analytics" },
   ];
 
@@ -224,8 +242,7 @@ const DashboardPage = () => {
           <FaPen size={13} className="text-[#0C0C0C]" />
         </span>
         <span
-          className="text-white text-lg font-semibold"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="text-white text-lg font-semibold font-playfair"
         >
           Insight Press
         </span>
@@ -247,12 +264,12 @@ const DashboardPage = () => {
         ))}
       </nav>
 
-      <div className="border-t border-white/6 pt-4 mt-4 space-y-1">
+      <div className="border-t border-white/6 pt-4 mt-auto space-y-1">
         <NavItem
           icon={<FaGear size={14} />}
           label="Settings"
-          active={false}
-          onClick={() => {}}
+          active={view === "settings"}
+          onClick={() => navigate("settings")}
         />
       </div>
 
@@ -275,8 +292,7 @@ const DashboardPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#0C0C0C] flex flex-col"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      className="h-screen bg-[#0C0C0C] flex flex-col font-dm-sans overflow-hidden"
     >
       <style>{`
         .ql-container.ql-snow { border: none !important; font-family: 'DM Sans', sans-serif; }
@@ -340,13 +356,15 @@ const DashboardPage = () => {
             </button>
             <div className="flex-1 min-w-0">
               <h2
-                className="text-white text-base sm:text-lg font-bold truncate"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="text-white text-base sm:text-lg font-bold truncate font-playfair"
               >
                 {view === "overview" && "Overview"}
                 {view === "new-post" && "New Post"}
                 {view === "my-posts" && "My Posts"}
                 {view === "analytics" && "Analytics"}
+                {view === "settings" && "Settings"}
+                {view === "comments" && "Comments"}
+                {view === "media" && "Media Library"}
               </h2>
             </div>
             <button
@@ -368,8 +386,7 @@ const DashboardPage = () => {
                   <div>
                     <p className="text-white/30 text-xs">Good morning,</p>
                     <h1
-                      className="text-white text-xl sm:text-2xl font-bold"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                      className="text-white text-xl sm:text-2xl font-bold font-playfair"
                     >
                       Amara Osei
                     </h1>
@@ -417,8 +434,7 @@ const DashboardPage = () => {
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3
-                      className="text-white font-bold text-base"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                      className="text-white font-bold text-base font-playfair"
                     >
                       Recent Posts
                     </h3>
@@ -471,8 +487,7 @@ const DashboardPage = () => {
                       Ready to write?
                     </p>
                     <p
-                      className="text-white text-lg sm:text-xl font-bold"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                      className="text-white text-lg sm:text-xl font-bold font-playfair"
                     >
                       Start your next piece.
                     </p>
@@ -499,8 +514,7 @@ const DashboardPage = () => {
                     value={postTitle}
                     onChange={(e) => setPostTitle(e.target.value)}
                     placeholder="Post title…"
-                    className="w-full bg-transparent border-none outline-none text-white text-2xl sm:text-3xl font-bold placeholder-white/15"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="w-full bg-transparent border-none outline-none text-white text-2xl sm:text-3xl font-bold placeholder-white/15 font-playfair"
                   />
                 </div>
 
@@ -580,13 +594,18 @@ const DashboardPage = () => {
             )}
 
             {view === "my-posts" && (
-              <div className="max-w-5xl mx-auto space-y-6">
+              <div className="max-w-6xl mx-auto space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-2">
                     {(["All", "Published", "Drafts"] as const).map((f) => (
                       <button
                         key={f}
-                        className="text-xs px-4 py-2 rounded-full border border-white/8 text-white/40 hover:text-white/70 hover:border-white/20 transition-all duration-150"
+                        onClick={() => setPostFilter(f)}
+                        className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 ${
+                          postFilter === f 
+                            ? "bg-white/10 text-white border-white/20" 
+                            : "border-white/8 text-white/40 hover:text-white/70 hover:border-white/20"
+                        }`}
                       >
                         {f}
                       </button>
@@ -602,7 +621,7 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {POSTS.map((post) => (
+                  {POSTS.filter((p) => postFilter === "All" || p.status.toLowerCase() === postFilter.toLowerCase()).map((post) => (
                     <div
                       key={post.id}
                       className="group bg-white/4 hover:bg-white/[0.07] border border-white/6 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all duration-200"
@@ -715,8 +734,7 @@ const DashboardPage = () => {
 
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
                   <h3
-                    className="text-white font-bold text-base mb-6"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="text-white font-bold text-base mb-6 font-playfair"
                   >
                     Views over the last 6 months
                   </h3>
@@ -750,8 +768,7 @@ const DashboardPage = () => {
 
                 <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
                   <h3
-                    className="text-white font-bold text-base mb-5"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="text-white font-bold text-base mb-5 font-playfair"
                   >
                     Top performing posts
                   </h3>
@@ -790,6 +807,192 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {view === "settings" && (
+              <div className="max-w-6xl mx-auto space-y-8">
+                {/* Profile Section */}
+                <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
+                  <h3 className="text-white font-bold text-lg mb-6 font-playfair">
+                    Public Profile
+                  </h3>
+                  
+                  <div className="flex flex-col sm:flex-row gap-8 items-start">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-24 h-24 rounded-full bg-amber-400 flex items-center justify-center text-3xl font-bold text-[#0C0C0C] shrink-0 relative group cursor-pointer transition-all">
+                        AO
+                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <FaPen size={16} className="text-white" />
+                        </div>
+                      </div>
+                      <button className="text-white/40 hover:text-white text-xs font-semibold transition-colors">
+                        Change Avatar
+                      </button>
+                    </div>
+
+                    <div className="flex-1 space-y-5 w-full">
+                      <div className="space-y-1.5">
+                        <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Display Name</label>
+                        <input 
+                          type="text" 
+                          defaultValue="Amara Osei" 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
+                        />
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Bio</label>
+                        <textarea 
+                          rows={4}
+                          defaultValue="Writing about design, technology, and the intersections between them. Verified Author at Insight Press."
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors resize-none"
+                        />
+                        <p className="text-white/30 text-xs text-right">0/160</p>
+                      </div>
+
+                      <button className="bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200">
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account Settings */}
+                <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
+                  <h3 className="text-white font-bold text-lg mb-6 font-playfair">
+                    Account Settings
+                  </h3>
+                  
+                  <div className="space-y-6 max-w-2xl">
+                    <div className="space-y-1.5">
+                      <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Email Address</label>
+                      <input 
+                        type="email" 
+                        defaultValue="amara.osei@example.com" 
+                        disabled
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/50 text-sm outline-none cursor-not-allowed"
+                      />
+                      <p className="text-white/30 text-xs mt-1">To change your email, please contact support.</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/6">
+                      <h4 className="text-white/80 font-medium text-sm mb-4">Change Password</h4>
+                      <div className="space-y-4">
+                        <input 
+                          type="password" 
+                          placeholder="Current Password" 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
+                        />
+                        <input 
+                          type="password" 
+                          placeholder="New Password" 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
+                        />
+                        <button className="border border-white/10 hover:border-white/20 text-white hover:text-white/90 font-semibold px-6 py-2.5 rounded-full text-sm transition-all duration-200">
+                          Update Password
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Danger Zone */}
+                <div className="border border-red-500/20 bg-red-500/5 rounded-2xl p-6 sm:p-8">
+                  <h3 className="text-red-400 font-bold text-lg mb-2 font-playfair">
+                    Danger Zone
+                  </h3>
+                  <p className="text-white/50 text-sm mb-6">
+                    Once you delete your account, there is no going back. All of your posts, drafts, and analytics will be permanently removed.
+                  </p>
+                  <button className="bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200 flex items-center gap-2">
+                    <FaTrash size={12} />
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {view === "comments" && (
+              <div className="max-w-6xl mx-auto space-y-6">
+                <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-white font-bold text-lg font-playfair">
+                      Recent Comments
+                    </h3>
+                  </div>
+                  <div className="space-y-4">
+                    {COMMENTS.map((comment) => (
+                      <div key={comment.id} className="p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/[0.07] transition-colors">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-amber-400/20 text-amber-400 rounded-full flex items-center justify-center font-bold text-xs shrink-0">
+                              {comment.author.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-white text-sm font-semibold">{comment.author}</p>
+                              <p className="text-white/30 text-[10px]">{comment.date}</p>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${comment.status === 'approved' ? 'bg-green-500/10 text-green-400' : 'bg-amber-400/10 text-amber-400'}`}>
+                            {comment.status}
+                          </span>
+                        </div>
+                        <p className="text-white/70 text-sm italic border-l-2 border-[#E8A838] pl-3 mb-3">
+                          "{comment.content}"
+                        </p>
+                        <p className="text-white/30 text-xs flex items-center gap-1.5 mb-4">
+                          <FaTag size={10} className="text-amber-400/50" /> On: <span className="text-white/50">{comment.postTitle}</span>
+                        </p>
+                        <div className="flex items-center gap-2">
+                          {comment.status !== 'approved' && (
+                            <button className="text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-1.5 rounded-lg transition-colors font-semibold">Approve</button>
+                          )}
+                          <button className="text-xs bg-white/5 hover:bg-white/10 text-white/70 px-3 py-1.5 rounded-lg transition-colors">Reply</button>
+                          <button className="text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors ml-auto">Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {view === "media" && (
+               <div className="max-w-6xl mx-auto space-y-6">
+                 <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
+                   <div className="flex items-center justify-between mb-8">
+                     <h3 className="text-white font-bold text-lg font-playfair">
+                       Media Library
+                     </h3>
+                     <button className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all duration-200">
+                       <FaPlus size={10} />
+                       Upload File
+                     </button>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                     {MEDIA.map((item) => (
+                       <div key={item.id} className="group relative bg-[#1a1a1a] border border-white/8 rounded-xl overflow-hidden hover:border-amber-400/40 transition-all duration-300 shadow-lg">
+                         <div className="aspect-square bg-white/5 relative overflow-hidden">
+                           <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                             <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-amber-400 hover:text-[#0C0C0C] text-white flex items-center justify-center transition-colors">
+                               <FaEye size={12} />
+                             </button>
+                             <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-red-500/80 hover:text-white text-white flex items-center justify-center transition-colors">
+                               <FaTrash size={12} />
+                             </button>
+                           </div>
+                         </div>
+                         <div className="p-3 border-t border-white/8 bg-white/2">
+                           <p className="text-white/90 text-sm font-semibold truncate mb-0.5" title={item.name}>{item.name}</p>
+                           <p className="text-white/40 text-[10px] uppercase tracking-wider">{item.size} • {item.date}</p>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </div>
             )}
           </main>
         </div>

@@ -13,6 +13,7 @@ const NAV_LINKS: NavLinkItem[] = [
   { label: "Blogs", to: "/blogs" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
+  { label: "Dashboard", to: "/dashboard" },
 ];
 
 const useScrolled = (threshold = 20) => {
