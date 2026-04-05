@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Models
+// -----------------------------------------------------------------------------
+
+model user {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String?
+  password    String
+  role        Role     @default(READER)
+  
+  writer      writer?
+  admin       admin?
+
+  posts       post[]
+  comments    comment[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model writer {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  bio         String?
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model admin {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  department  String?
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model post {
+  id          String    @id @default(uuid())
+  title       String
+  slug        String    @unique
+  content     String
+  published   Boolean   @default(false)
+  
+  author_id   String
+  author      user      @relation(fields: [author_id], references: [id])
+  
+  category_id String?
+  category    category? @relation(fields: [category_id], references: [id])
+  
+  tags        tag[]
+  comments    comment[]
+  
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  posts       post[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model tag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  posts       post[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model comment {
+  id          String   @id @default(uuid())
+  content     String
+  
+  post_id     String
+  post        post     @relation(fields: [post_id], references: [id])
+  
+  author_id   String
+  author      user     @relation(fields: [author_id], references: [id])
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+enum Role {
+  READER
+  AUTHOR
+  ADMIN
+}
