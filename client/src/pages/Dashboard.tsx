@@ -1,211 +1,35 @@
-/* eslint-disable react-hooks/static-components */
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
-import {
-  FaPen,
-  FaFeatherAlt,
-  FaArrowRight,
-  FaCheck,
-  FaEye,
-  FaBookOpen,
-  FaUsers,
-  FaClock,
-} from "react-icons/fa";
-import {
-  FaHouse,
-  FaChartLine,
-  FaGear,
-  FaPlus,
-  FaList,
-  FaBars,
-  FaXmark,
-  FaTag,
-  FaFloppyDisk,
-  FaPaperPlane,
-  FaTrash,
-  FaEllipsis,
-  FaComment,
-  FaImage,
-} from "react-icons/fa6";
+import { FaBars, FaCheck, FaFloppyDisk, FaPlus } from "react-icons/fa6";
+import type { View } from "../components/dashboard/types";
+import { Sidebar } from "../components/dashboard/sidebar";
+import { OverviewView } from "../components/dashboard/views/overview-view";
+import { NewPostView } from "../components/dashboard/views/new-post-view";
+import { MyPostsView } from "../components/dashboard/views/my-posts-view";
+import { AnalyticsView } from "../components/dashboard/views/analytics-view";
+import { SettingsView } from "../components/dashboard/views/settings-view";
+import { CommentsView } from "../components/dashboard/views/comments-view";
+import { MediaView } from "../components/dashboard/views/media-view";
 
-type View = "overview" | "new-post" | "my-posts" | "analytics" | "settings" | "comments" | "media";
-
-const STATS = [
-  {
-    label: "Total Views",
-    value: "24,831",
-    delta: "+12%",
-    icon: <FaEye size={15} />,
-    color: "#E8A838",
-  },
-  {
-    label: "Followers",
-    value: "1,204",
-    delta: "+8%",
-    icon: <FaUsers size={15} />,
-    color: "#5B8DEF",
-  },
-  {
-    label: "Posts Published",
-    value: "38",
-    delta: "+3",
-    icon: <FaBookOpen size={15} />,
-    color: "#3DBDA7",
-  },
-  {
-    label: "Avg. Read Time",
-    value: "4m 12s",
-    delta: "+0:24",
-    icon: <FaClock size={15} />,
-    color: "#E87B5B",
-  },
-];
-
-const POSTS = [
-  {
-    id: 1,
-    title: "The Invisible Grid: How Whitespace Shapes Reader Trust",
-    views: 3240,
-    status: "published",
-    date: "Mar 28, 2026",
-    readTime: "5 min",
-  },
-  {
-    id: 2,
-    title: "Building for the Long Run: Why Boring Tech Wins",
-    views: 1870,
-    status: "published",
-    date: "Mar 21, 2026",
-    readTime: "7 min",
-  },
-  {
-    id: 3,
-    title: "The First Sentence Is Everything",
-    views: 5120,
-    status: "published",
-    date: "Mar 14, 2026",
-    readTime: "4 min",
-  },
-  {
-    id: 4,
-    title: "Notes on Creative Exhaustion",
-    views: 0,
-    status: "draft",
-    date: "Apr 1, 2026",
-    readTime: "—",
-  },
-  {
-    id: 5,
-    title: "Why I Stopped Using AI for First Drafts",
-    views: 0,
-    status: "draft",
-    date: "Apr 2, 2026",
-    readTime: "—",
-  },
-];
-
-const COMMENTS = [
-  { id: 1, author: "Jane Doe", content: "This structure really changed how I think about layout. Thanks for sharing!", postTitle: "The Invisible Grid: How Whitespace Shapes Reader Trust", date: "Apr 3, 2026", status: "approved" },
-  { id: 2, author: "John Smith", content: "I somewhat disagree, density has its place in data-heavy apps.", postTitle: "The Invisible Grid: How Whitespace Shapes Reader Trust", date: "Apr 2, 2026", status: "pending" },
-  { id: 3, author: "Sarah Lee", content: "Great read! Looking forward to part 2.", postTitle: "Building for the Long Run: Why Boring Tech Wins", date: "Mar 25, 2026", status: "approved" },
-];
-
-const MEDIA = [
-  { id: 1, url: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=400", name: "workspace-hero.jpg", size: "1.2 MB", date: "Mar 10, 2026" },
-  { id: 2, url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400", name: "code-snippet.png", size: "2.4 MB", date: "Mar 12, 2026" },
-  { id: 3, url: "https://images.unsplash.com/photo-1507238691740-187a552e4ec7?auto=format&fit=crop&q=80&w=400", name: "meeting-notes.jpg", size: "840 KB", date: "Mar 20, 2026" },
-  { id: 4, url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=400", name: "server-rack.jpg", size: "3.1 MB", date: "Apr 1, 2026" },
-];
-
-const ANALYTICS_DATA = [
-  { month: "Oct", views: 1200 },
-  { month: "Nov", views: 1800 },
-  { month: "Dec", views: 1400 },
-  { month: "Jan", views: 2100 },
-  { month: "Feb", views: 3200 },
-  { month: "Mar", views: 4800 },
-];
-
-const MAX_VIEWS = Math.max(...ANALYTICS_DATA.map((d) => d.views));
-
-const quillModules = {
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["link", "image"],
-    ["clean"],
-  ],
+const VIEW_LABELS: Record<View, string> = {
+  overview: "Overview",
+  "new-post": "New Post",
+  "my-posts": "My Posts",
+  analytics: "Analytics",
+  settings: "Settings",
+  comments: "Comments",
+  media: "Media Library",
 };
-
-const quillFormats = [
-  "header",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "link",
-  "image",
-];
-
-const NavItem = ({
-  icon,
-  label,
-  active,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-      active
-        ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
-        : "text-white/40 hover:text-white/70 hover:bg-white/4"
-    }`}
-  >
-    <span className={active ? "text-amber-400" : "text-white/30"}>{icon}</span>
-    {label}
-    {active && <FaCheck size={9} className="text-amber-400 ml-auto" />}
-  </button>
-);
 
 const DashboardPage = () => {
   const [view, setView] = useState<View>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [postTitle, setPostTitle] = useState("");
-  const [postContent, setPostContent] = useState("");
-  //   const [postTags, setPostTags] = useState("");
-  const [tagInput, setTagInput] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
   const [publishedToast, setPublishedToast] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
-  const [postMenuOpen, setPostMenuOpen] = useState<number | null>(null);
-  const [postFilter, setPostFilter] = useState<"All" | "Published" | "Drafts">("All");
 
-  const wordCount = postContent
-    .replace(/<[^>]*>/g, "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && tagInput.trim() && tags.length < 5) {
-      setTags((prev) => [...prev, tagInput.trim()]);
-      setTagInput("");
-    }
+  const navigate = (v: View) => {
+    setView(v);
+    setSidebarOpen(false);
   };
-
-  const handleRemoveTag = (tag: string) =>
-    setTags((prev) => prev.filter((t) => t !== tag));
 
   const triggerToast = (type: "publish" | "save") => {
     if (type === "publish") {
@@ -217,96 +41,20 @@ const DashboardPage = () => {
     }
   };
 
-  const navigate = (v: View) => {
-    setView(v);
-    setSidebarOpen(false);
-  };
-
-  const navItems: { icon: React.ReactNode; label: string; id: View }[] = [
-    { icon: <FaHouse size={14} />, label: "Overview", id: "overview" },
-    { icon: <FaPlus size={14} />, label: "New Post", id: "new-post" },
-    { icon: <FaList size={14} />, label: "My Posts", id: "my-posts" },
-    { icon: <FaComment size={14} />, label: "Comments", id: "comments" },
-    { icon: <FaImage size={14} />, label: "Media Library", id: "media" },
-    { icon: <FaChartLine size={14} />, label: "Analytics", id: "analytics" },
-  ];
-
-  const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
-    <div
-      className={`${
-        mobile ? "flex flex-col h-full" : "hidden lg:flex flex-col h-full"
-      } w-64 bg-[#0C0C0C] border-r border-white/6 px-4 py-6 shrink-0`}
-    >
-      <Link to="/" className="flex items-center gap-2.5 mb-8 group w-fit">
-        <span className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-          <FaPen size={13} className="text-[#0C0C0C]" />
-        </span>
-        <span
-          className="text-white text-lg font-semibold font-playfair"
-        >
-          Insight Press
-        </span>
-      </Link>
-
-      <p className="text-white/20 text-[10px] font-semibold tracking-widest uppercase mb-3 px-1">
-        Workspace
-      </p>
-
-      <nav className="space-y-1 flex-1">
-        {navItems.map((item) => (
-          <NavItem
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={view === item.id}
-            onClick={() => navigate(item.id)}
-          />
-        ))}
-      </nav>
-
-      <div className="border-t border-white/6 pt-4 mt-auto space-y-1">
-        <NavItem
-          icon={<FaGear size={14} />}
-          label="Settings"
-          active={view === "settings"}
-          onClick={() => navigate("settings")}
-        />
-      </div>
-
-      <div className="mt-4 p-3 bg-white/4 border border-white/8 rounded-xl flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-xs font-bold text-[#0C0C0C] shrink-0">
-          AO
-        </div>
-        <div className="min-w-0">
-          <p className="text-white/80 text-xs font-semibold truncate">
-            Amara Osei
-          </p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <FaFeatherAlt size={8} className="text-amber-400" />
-            <p className="text-white/30 text-[10px]">Verified Author</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div
-      className="h-screen bg-[#0C0C0C] flex flex-col font-dm-sans overflow-hidden"
-    >
+    <div className="h-screen bg-[#0C0C0C] flex flex-col font-dm-sans overflow-hidden">
       <style>{`
-        .ql-container.ql-snow { border: none !important; font-family: 'DM Sans', sans-serif; }
-        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; background: rgba(255,255,255,0.03); border-radius: 12px 12px 0 0; padding: 10px 12px !important; }
-        .ql-snow .ql-stroke { stroke: rgba(255,255,255,0.35) !important; }
-        .ql-snow .ql-fill { fill: rgba(255,255,255,0.35) !important; }
-        .ql-snow .ql-picker { color: rgba(255,255,255,0.35) !important; }
-        .ql-snow .ql-picker-options { background: #1a1a1a !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 8px !important; }
-        .ql-snow .ql-picker-item { color: rgba(255,255,255,0.6) !important; }
+        .ql-toolbar.ql-snow { background: rgba(255,255,255,0.03) !important; border-color: rgba(255,255,255,0.08) !important; border-radius: 16px 16px 0 0 !important; padding: 10px 14px !important; }
+        .ql-snow .ql-stroke { stroke: rgba(255,255,255,0.3) !important; }
+        .ql-snow .ql-fill { fill: rgba(255,255,255,0.3) !important; }
+        .ql-snow .ql-picker { color: rgba(255,255,255,0.4) !important; }
+        .ql-snow .ql-picker-options { background: #1a1a1a !important; border-color: rgba(255,255,255,0.08) !important; border-radius: 12px !important; }
         .ql-snow .ql-picker-item:hover { color: #FBBF24 !important; }
         .ql-toolbar.ql-snow .ql-formats button:hover .ql-stroke { stroke: #FBBF24 !important; }
         .ql-toolbar.ql-snow .ql-formats button.ql-active .ql-stroke { stroke: #FBBF24 !important; }
         .ql-toolbar.ql-snow .ql-formats button:hover .ql-fill { fill: #FBBF24 !important; }
         .ql-toolbar.ql-snow .ql-formats button.ql-active .ql-fill { fill: #FBBF24 !important; }
+        .ql-container.ql-snow { border: none !important; font-family: 'DM Sans', sans-serif; }
         .ql-editor { min-height: 340px; color: rgba(255,255,255,0.8) !important; font-size: 15px !important; line-height: 1.8 !important; padding: 20px 24px !important; }
         .ql-editor.ql-blank::before { color: rgba(255,255,255,0.2) !important; font-style: normal !important; font-size: 15px; }
         .ql-editor h1, .ql-editor h2, .ql-editor h3 { color: white !important; font-family: 'Playfair Display', serif !important; }
@@ -316,19 +64,19 @@ const DashboardPage = () => {
         .ql-snow .ql-editor pre.ql-syntax { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.8) !important; border-radius: 8px !important; }
       `}</style>
 
+      {/* Toast Notifications */}
       {publishedToast && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-green-500/10 border border-green-500/25 text-green-400 px-5 py-3.5 rounded-2xl text-sm font-medium shadow-2xl backdrop-blur-sm">
-          <FaCheck size={12} />
-          Post published successfully
+          <FaCheck size={12} /> Post published successfully
         </div>
       )}
       {savedToast && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-white/5 border border-white/10 text-white/70 px-5 py-3.5 rounded-2xl text-sm font-medium shadow-2xl backdrop-blur-sm">
-          <FaFloppyDisk size={12} />
-          Draft saved
+          <FaFloppyDisk size={12} /> Draft saved
         </div>
       )}
 
+      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/60 lg:hidden"
@@ -340,13 +88,15 @@ const DashboardPage = () => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar mobile />
+        <Sidebar mobile view={view} navigate={navigate} />
       </div>
 
+      {/* Main layout */}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        <Sidebar view={view} navigate={navigate} />
 
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+          {/* Top header */}
           <header className="sticky top-0 z-20 bg-[#0C0C0C]/90 backdrop-blur-sm border-b border-white/6 px-5 sm:px-8 py-4 flex items-center gap-4">
             <button
               className="lg:hidden text-white/40 hover:text-white/70 transition-colors p-1"
@@ -355,645 +105,32 @@ const DashboardPage = () => {
               <FaBars size={18} />
             </button>
             <div className="flex-1 min-w-0">
-              <h2
-                className="text-white text-base sm:text-lg font-bold truncate font-playfair"
-              >
-                {view === "overview" && "Overview"}
-                {view === "new-post" && "New Post"}
-                {view === "my-posts" && "My Posts"}
-                {view === "analytics" && "Analytics"}
-                {view === "settings" && "Settings"}
-                {view === "comments" && "Comments"}
-                {view === "media" && "Media Library"}
+              <h2 className="text-white text-base sm:text-lg font-bold truncate font-playfair">
+                {VIEW_LABELS[view]}
               </h2>
             </div>
             <button
               onClick={() => navigate("new-post")}
               className="hidden sm:inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-5 py-2.5 rounded-full text-xs transition-all duration-200 hover:shadow-lg hover:shadow-amber-400/20 shrink-0"
             >
-              <FaPlus size={11} />
-              New Post
+              <FaPlus size={11} /> New Post
             </button>
           </header>
 
+          {/* View content */}
           <main className="flex-1 px-5 sm:px-8 py-8">
-            {view === "overview" && (
-              <div className="max-w-5xl mx-auto space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-full bg-amber-400 flex items-center justify-center text-sm font-bold text-[#0C0C0C] shrink-0">
-                    AO
-                  </div>
-                  <div>
-                    <p className="text-white/30 text-xs">Good morning,</p>
-                    <h1
-                      className="text-white text-xl sm:text-2xl font-bold font-playfair"
-                    >
-                      Amara Osei
-                    </h1>
-                  </div>
-                  <div className="ml-auto hidden sm:flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/20 rounded-full px-3 py-1.5">
-                    <FaFeatherAlt size={9} className="text-amber-400" />
-                    <span className="text-amber-400 text-[10px] font-semibold">
-                      Verified Author
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {STATS.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="bg-white/4 border border-white/8 rounded-2xl p-4 sm:p-5 hover:bg-white/[0.07] transition-colors duration-200"
-                    >
-                      <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-                        style={{
-                          backgroundColor: `${stat.color}22`,
-                          color: stat.color,
-                        }}
-                      >
-                        {stat.icon}
-                      </div>
-                      <p className="text-white text-xl sm:text-2xl font-bold mb-0.5">
-                        {stat.value}
-                      </p>
-                      <p className="text-white/35 text-xs mb-2">{stat.label}</p>
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: `${stat.color}18`,
-                          color: stat.color,
-                        }}
-                      >
-                        {stat.delta} this month
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3
-                      className="text-white font-bold text-base font-playfair"
-                    >
-                      Recent Posts
-                    </h3>
-                    <button
-                      onClick={() => navigate("my-posts")}
-                      className="text-amber-400 text-xs font-semibold hover:text-amber-300 transition-colors flex items-center gap-1"
-                    >
-                      View all <FaArrowRight size={10} />
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    {POSTS.slice(0, 4).map((post) => (
-                      <div
-                        key={post.id}
-                        className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/4 transition-colors duration-150 group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white/80 text-sm font-medium truncate group-hover:text-white transition-colors">
-                            {post.title}
-                          </p>
-                          <p className="text-white/25 text-xs mt-0.5">
-                            {post.date}
-                          </p>
-                        </div>
-                        <div className="hidden sm:flex items-center gap-2 shrink-0">
-                          {post.status === "published" ? (
-                            <>
-                              <span className="flex items-center gap-1 text-white/30 text-xs">
-                                <FaEye size={10} />
-                                {post.views.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded-full font-medium">
-                                Published
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-[10px] bg-white/5 text-white/30 border border-white/8 px-2 py-0.5 rounded-full font-medium">
-                              Draft
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-linear-to-br from-amber-400/8 to-amber-500/4 border border-amber-400/15 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase mb-1">
-                      Ready to write?
-                    </p>
-                    <p
-                      className="text-white text-lg sm:text-xl font-bold font-playfair"
-                    >
-                      Start your next piece.
-                    </p>
-                    <p className="text-white/40 text-sm mt-1">
-                      Your last draft was saved 2 days ago.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => navigate("new-post")}
-                    className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-6 py-3 rounded-full text-sm transition-all duration-200 hover:shadow-xl hover:shadow-amber-400/25 shrink-0"
-                  >
-                    Open editor
-                    <FaArrowRight size={12} />
-                  </button>
-                </div>
-              </div>
-            )}
-
+            {view === "overview" && <OverviewView navigate={navigate} />}
             {view === "new-post" && (
-              <div className="max-w-3xl mx-auto space-y-5">
-                <div>
-                  <input
-                    type="text"
-                    value={postTitle}
-                    onChange={(e) => setPostTitle(e.target.value)}
-                    placeholder="Post title…"
-                    className="w-full bg-transparent border-none outline-none text-white text-2xl sm:text-3xl font-bold placeholder-white/15 font-playfair"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1.5 bg-white/6 border border-white/10 text-white/50 text-xs px-3 py-1 rounded-full"
-                    >
-                      <FaTag size={8} className="text-amber-400" />
-                      {tag}
-                      <button
-                        onClick={() => handleRemoveTag(tag)}
-                        className="text-white/30 hover:text-white/60 ml-0.5"
-                      >
-                        <FaXmark size={9} />
-                      </button>
-                    </span>
-                  ))}
-                  {tags.length < 5 && (
-                    <input
-                      type="text"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={handleAddTag}
-                      placeholder="Add tag… (press Enter)"
-                      className="bg-transparent outline-none text-white/40 text-xs placeholder-white/20 min-w-32"
-                    />
-                  )}
-                </div>
-
-                <div className="border border-white/8 rounded-2xl overflow-hidden bg-white/3">
-                  <ReactQuill
-                    theme="snow"
-                    value={postContent}
-                    onChange={setPostContent}
-                    modules={quillModules}
-                    formats={quillFormats}
-                    placeholder="Begin writing your story…"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2 text-white/25 text-xs">
-                    <FaFeatherAlt size={10} className="text-amber-400/50" />
-                    <span>
-                      {wordCount} {wordCount === 1 ? "word" : "words"}
-                    </span>
-                    {wordCount > 0 && (
-                      <>
-                        <span>·</span>
-                        <span>
-                          ~{Math.max(1, Math.ceil(wordCount / 200))} min read
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <button
-                      onClick={() => triggerToast("save")}
-                      className="inline-flex items-center gap-2 border border-white/10 hover:border-white/20 text-white/50 hover:text-white/80 font-medium px-4 py-2.5 rounded-full text-xs transition-all duration-200 touch-manipulation"
-                    >
-                      <FaFloppyDisk size={11} />
-                      <span className="hidden sm:inline">Save draft</span>
-                    </button>
-                    <button
-                      onClick={() => triggerToast("publish")}
-                      disabled={!postTitle.trim() || !postContent.trim()}
-                      className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-[#0C0C0C] font-bold px-5 py-2.5 rounded-full text-xs transition-all duration-200 hover:shadow-lg hover:shadow-amber-400/20 touch-manipulation"
-                    >
-                      <FaPaperPlane size={11} />
-                      Publish
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <NewPostView
+                onPublish={() => triggerToast("publish")}
+                onSaveDraft={() => triggerToast("save")}
+              />
             )}
-
-            {view === "my-posts" && (
-              <div className="max-w-6xl mx-auto space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-2">
-                    {(["All", "Published", "Drafts"] as const).map((f) => (
-                      <button
-                        key={f}
-                        onClick={() => setPostFilter(f)}
-                        className={`text-xs px-4 py-2 rounded-full border transition-all duration-150 ${
-                          postFilter === f 
-                            ? "bg-white/10 text-white border-white/20" 
-                            : "border-white/8 text-white/40 hover:text-white/70 hover:border-white/20"
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => navigate("new-post")}
-                    className="ml-auto inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all duration-200"
-                  >
-                    <FaPlus size={10} />
-                    New Post
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {POSTS.filter((p) => postFilter === "All" || p.status.toLowerCase() === postFilter.toLowerCase()).map((post) => (
-                    <div
-                      key={post.id}
-                      className="group bg-white/4 hover:bg-white/[0.07] border border-white/6 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all duration-200"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white/80 text-sm font-medium truncate group-hover:text-white transition-colors">
-                          {post.title}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                          <span className="text-white/25 text-xs">
-                            {post.date}
-                          </span>
-                          {post.status === "published" && (
-                            <>
-                              <span className="text-white/15 text-xs">·</span>
-                              <span className="flex items-center gap-1 text-white/25 text-xs">
-                                <FaEye size={9} />
-                                {post.views.toLocaleString()} views
-                              </span>
-                              <span className="text-white/15 text-xs">·</span>
-                              <span className="text-white/25 text-xs">
-                                {post.readTime} read
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span
-                          className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
-                            post.status === "published"
-                              ? "bg-green-500/10 text-green-400 border-green-500/20"
-                              : "bg-white/5 text-white/30 border-white/8"
-                          }`}
-                        >
-                          {post.status === "published" ? "Published" : "Draft"}
-                        </span>
-
-                        <div className="relative">
-                          <button
-                            onClick={() =>
-                              setPostMenuOpen(
-                                postMenuOpen === post.id ? null : post.id,
-                              )
-                            }
-                            className="text-white/20 hover:text-white/50 transition-colors p-1"
-                          >
-                            <FaEllipsis size={14} />
-                          </button>
-                          {postMenuOpen === post.id && (
-                            <div className="absolute right-0 top-full mt-1 w-36 bg-[#1a1a1a] border border-white/8 rounded-xl shadow-2xl z-10 overflow-hidden">
-                              <button
-                                onClick={() => {
-                                  navigate("new-post");
-                                  setPostMenuOpen(null);
-                                }}
-                                className="w-full text-left px-4 py-2.5 text-white/60 hover:text-white hover:bg-white/5 text-xs transition-colors"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => setPostMenuOpen(null)}
-                                className="w-full text-left px-4 py-2.5 text-white/60 hover:text-white hover:bg-white/5 text-xs transition-colors"
-                              >
-                                Duplicate
-                              </button>
-                              <div className="border-t border-white/6" />
-                              <button
-                                onClick={() => setPostMenuOpen(null)}
-                                className="w-full text-left px-4 py-2.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/5 text-xs transition-colors flex items-center gap-2"
-                              >
-                                <FaTrash size={10} />
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {view === "analytics" && (
-              <div className="max-w-5xl mx-auto space-y-8">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {STATS.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="bg-white/4 border border-white/8 rounded-2xl p-4 sm:p-5"
-                    >
-                      <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-                        style={{
-                          backgroundColor: `${stat.color}22`,
-                          color: stat.color,
-                        }}
-                      >
-                        {stat.icon}
-                      </div>
-                      <p className="text-white text-xl sm:text-2xl font-bold mb-0.5">
-                        {stat.value}
-                      </p>
-                      <p className="text-white/35 text-xs">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
-                  <h3
-                    className="text-white font-bold text-base mb-6 font-playfair"
-                  >
-                    Views over the last 6 months
-                  </h3>
-                  <div className="flex items-end gap-2 sm:gap-3 h-44">
-                    {ANALYTICS_DATA.map((d) => (
-                      <div
-                        key={d.month}
-                        className="flex-1 flex flex-col items-center gap-2"
-                      >
-                        <span className="text-white/30 text-[10px]">
-                          {d.views >= 1000
-                            ? `${(d.views / 1000).toFixed(1)}k`
-                            : d.views}
-                        </span>
-                        <div
-                          className="w-full rounded-t-lg bg-amber-400/15 relative overflow-hidden group transition-all duration-300 hover:bg-amber-400/25"
-                          style={{ height: `${(d.views / MAX_VIEWS) * 140}px` }}
-                        >
-                          <div
-                            className="absolute bottom-0 left-0 right-0 bg-amber-400/60 rounded-t-lg transition-all duration-700"
-                            style={{ height: "100%" }}
-                          />
-                        </div>
-                        <span className="text-white/20 text-[10px]">
-                          {d.month}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
-                  <h3
-                    className="text-white font-bold text-base mb-5 font-playfair"
-                  >
-                    Top performing posts
-                  </h3>
-                  <div className="space-y-4">
-                    {POSTS.filter((p) => p.status === "published")
-                      .sort((a, b) => b.views - a.views)
-                      .map((post, i) => (
-                        <div key={post.id} className="flex items-center gap-4">
-                          <span
-                            className="text-xs font-bold w-5 shrink-0 text-center"
-                            style={{
-                              color:
-                                i === 0 ? "#E8A838" : "rgba(255,255,255,0.2)",
-                            }}
-                          >
-                            {i + 1}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white/70 text-sm truncate">
-                              {post.title}
-                            </p>
-                            <div className="mt-1.5 w-full bg-white/5 rounded-full h-1">
-                              <div
-                                className="h-1 rounded-full bg-amber-400/50"
-                                style={{
-                                  width: `${(post.views / 5120) * 100}%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <span className="text-white/35 text-xs shrink-0">
-                            {post.views.toLocaleString()} views
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {view === "settings" && (
-              <div className="max-w-6xl mx-auto space-y-8">
-                {/* Profile Section */}
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
-                  <h3 className="text-white font-bold text-lg mb-6 font-playfair">
-                    Public Profile
-                  </h3>
-                  
-                  <div className="flex flex-col sm:flex-row gap-8 items-start">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-24 h-24 rounded-full bg-amber-400 flex items-center justify-center text-3xl font-bold text-[#0C0C0C] shrink-0 relative group cursor-pointer transition-all">
-                        AO
-                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FaPen size={16} className="text-white" />
-                        </div>
-                      </div>
-                      <button className="text-white/40 hover:text-white text-xs font-semibold transition-colors">
-                        Change Avatar
-                      </button>
-                    </div>
-
-                    <div className="flex-1 space-y-5 w-full">
-                      <div className="space-y-1.5">
-                        <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Display Name</label>
-                        <input 
-                          type="text" 
-                          defaultValue="Amara Osei" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
-                        />
-                      </div>
-                      
-                      <div className="space-y-1.5">
-                        <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Bio</label>
-                        <textarea 
-                          rows={4}
-                          defaultValue="Writing about design, technology, and the intersections between them. Verified Author at Insight Press."
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors resize-none"
-                        />
-                        <p className="text-white/30 text-xs text-right">0/160</p>
-                      </div>
-
-                      <button className="bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200">
-                        Save Changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Account Settings */}
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
-                  <h3 className="text-white font-bold text-lg mb-6 font-playfair">
-                    Account Settings
-                  </h3>
-                  
-                  <div className="space-y-6 max-w-2xl">
-                    <div className="space-y-1.5">
-                      <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Email Address</label>
-                      <input 
-                        type="email" 
-                        defaultValue="amara.osei@example.com" 
-                        disabled
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/50 text-sm outline-none cursor-not-allowed"
-                      />
-                      <p className="text-white/30 text-xs mt-1">To change your email, please contact support.</p>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/6">
-                      <h4 className="text-white/80 font-medium text-sm mb-4">Change Password</h4>
-                      <div className="space-y-4">
-                        <input 
-                          type="password" 
-                          placeholder="Current Password" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
-                        />
-                        <input 
-                          type="password" 
-                          placeholder="New Password" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
-                        />
-                        <button className="border border-white/10 hover:border-white/20 text-white hover:text-white/90 font-semibold px-6 py-2.5 rounded-full text-sm transition-all duration-200">
-                          Update Password
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Danger Zone */}
-                <div className="border border-red-500/20 bg-red-500/5 rounded-2xl p-6 sm:p-8">
-                  <h3 className="text-red-400 font-bold text-lg mb-2 font-playfair">
-                    Danger Zone
-                  </h3>
-                  <p className="text-white/50 text-sm mb-6">
-                    Once you delete your account, there is no going back. All of your posts, drafts, and analytics will be permanently removed.
-                  </p>
-                  <button className="bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200 flex items-center gap-2">
-                    <FaTrash size={12} />
-                    Delete Account
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {view === "comments" && (
-              <div className="max-w-6xl mx-auto space-y-6">
-                <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-white font-bold text-lg font-playfair">
-                      Recent Comments
-                    </h3>
-                  </div>
-                  <div className="space-y-4">
-                    {COMMENTS.map((comment) => (
-                      <div key={comment.id} className="p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/[0.07] transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-amber-400/20 text-amber-400 rounded-full flex items-center justify-center font-bold text-xs shrink-0">
-                              {comment.author.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="text-white text-sm font-semibold">{comment.author}</p>
-                              <p className="text-white/30 text-[10px]">{comment.date}</p>
-                            </div>
-                          </div>
-                          <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${comment.status === 'approved' ? 'bg-green-500/10 text-green-400' : 'bg-amber-400/10 text-amber-400'}`}>
-                            {comment.status}
-                          </span>
-                        </div>
-                        <p className="text-white/70 text-sm italic border-l-2 border-[#E8A838] pl-3 mb-3">
-                          "{comment.content}"
-                        </p>
-                        <p className="text-white/30 text-xs flex items-center gap-1.5 mb-4">
-                          <FaTag size={10} className="text-amber-400/50" /> On: <span className="text-white/50">{comment.postTitle}</span>
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {comment.status !== 'approved' && (
-                            <button className="text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-1.5 rounded-lg transition-colors font-semibold">Approve</button>
-                          )}
-                          <button className="text-xs bg-white/5 hover:bg-white/10 text-white/70 px-3 py-1.5 rounded-lg transition-colors">Reply</button>
-                          <button className="text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors ml-auto">Delete</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {view === "media" && (
-               <div className="max-w-6xl mx-auto space-y-6">
-                 <div className="bg-white/4 border border-white/8 rounded-2xl p-5 sm:p-6">
-                   <div className="flex items-center justify-between mb-8">
-                     <h3 className="text-white font-bold text-lg font-playfair">
-                       Media Library
-                     </h3>
-                     <button className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all duration-200">
-                       <FaPlus size={10} />
-                       Upload File
-                     </button>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                     {MEDIA.map((item) => (
-                       <div key={item.id} className="group relative bg-[#1a1a1a] border border-white/8 rounded-xl overflow-hidden hover:border-amber-400/40 transition-all duration-300 shadow-lg">
-                         <div className="aspect-square bg-white/5 relative overflow-hidden">
-                           <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                             <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-amber-400 hover:text-[#0C0C0C] text-white flex items-center justify-center transition-colors">
-                               <FaEye size={12} />
-                             </button>
-                             <button className="w-9 h-9 rounded-full bg-white/10 hover:bg-red-500/80 hover:text-white text-white flex items-center justify-center transition-colors">
-                               <FaTrash size={12} />
-                             </button>
-                           </div>
-                         </div>
-                         <div className="p-3 border-t border-white/8 bg-white/2">
-                           <p className="text-white/90 text-sm font-semibold truncate mb-0.5" title={item.name}>{item.name}</p>
-                           <p className="text-white/40 text-[10px] uppercase tracking-wider">{item.size} • {item.date}</p>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               </div>
-            )}
+            {view === "my-posts" && <MyPostsView navigate={navigate} />}
+            {view === "analytics" && <AnalyticsView />}
+            {view === "settings" && <SettingsView />}
+            {view === "comments" && <CommentsView />}
+            {view === "media" && <MediaView />}
           </main>
         </div>
       </div>
