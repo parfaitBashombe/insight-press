@@ -1,104 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma/client"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-// -----------------------------------------------------------------------------
-// Models
-// -----------------------------------------------------------------------------
+model UserProfile {
+  user_profile_id String @id @default(uuid())
+  user_id         String
+  User            User   @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime @default(now())
 
-model user {
-  id          String   @id @default(uuid())
-  email       String   @unique
-  name        String?
-  password    String
-  role        Role     @default(READER)
-  
-  writer      writer?
-  admin       admin?
-
-  posts       post[]
-  comments    comment[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  @@map("user_profiles")
 }
 
-model writer {
-  id          String   @id @default(uuid())
-  user_id     String   @unique
-  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  bio         String?
-  
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+model User {
+  user_id       String         @id @default(uuid())
+  email         String         @unique
+  fullname      String
+  password      String
+  salt          String
+  status        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  UserProfile   UserProfile[]
+  RefreshTokens RefreshToken[]
+
+  @@map("users")
 }
 
-model admin {
-  id          String   @id @default(uuid())
-  user_id     String   @unique
-  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  department  String?
-  
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-}
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  user_id   String
+  User      User   @relation(fields: [user_id], references: [user_id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
-model post {
-  id          String    @id @default(uuid())
-  title       String
-  slug        String    @unique
-  content     String
-  published   Boolean   @default(false)
-  
-  author_id   String
-  author      user      @relation(fields: [author_id], references: [id])
-  
-  category_id String?
-  category    category? @relation(fields: [category_id], references: [id])
-  
-  tags        tag[]
-  comments    comment[]
-  
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-}
-
-model category {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  posts       post[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-}
-
-model tag {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  posts       post[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-}
-
-model comment {
-  id          String   @id @default(uuid())
-  content     String
-  
-  post_id     String
-  post        post     @relation(fields: [post_id], references: [id])
-  
-  author_id   String
-  author      user     @relation(fields: [author_id], references: [id])
-  
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-}
-
-enum Role {
-  READER
-  AUTHOR
-  ADMIN
+  @@map("refresh_tokens")
 }
