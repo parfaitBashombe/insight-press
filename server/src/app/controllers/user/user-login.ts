@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import BaseController from "@/core/base/base-controller.js";
-import { type User } from "@/generated/prisma/client.js";
+import { type user } from "@/generated/prisma/client.js";
 import { type LogIn } from "@/types/user.js";
 import {
   setAccessCookie,
@@ -23,7 +23,7 @@ class LogInUserController extends BaseController {
       );
     }
 
-    const userData = this.Utils.omitProperty(result as User, [
+    const userData = this.Utils.omitProperty(result as user, [
       "salt",
       "password",
       "status",

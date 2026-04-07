@@ -15,7 +15,7 @@ class UpdateUserRoute implements IRoute {
   }
 
   private initRoute(): void {
-    this.router.route(`${this.path}update/:id`).put(
+    this.router.route(`${this.path}update/:id`).patch(
       // (req: Request, res: Response, next: NextFunction) =>
       //   Validators.Id.run(req, res, next),
 

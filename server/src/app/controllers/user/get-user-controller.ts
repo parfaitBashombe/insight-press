@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "@/generated/prisma/client.js";
+import { user } from "@/generated/prisma/client.js";
 
 import BaseControlller from "@/core/base/base-controller.js";
 
@@ -18,7 +18,7 @@ class GetUserController extends BaseControlller {
       );
     }
 
-    const userData = this.Utils.omitProperty(user as User, [
+    const userData = this.Utils.omitProperty(req.currentUser as user, [
       "salt",
       "password",
       "status",
