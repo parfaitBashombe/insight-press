@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaBars, FaCheck, FaFloppyDisk, FaPlus } from "react-icons/fa6";
 import type { View } from "../components/dashboard/types";
 import { Sidebar } from "../components/dashboard/sidebar";
@@ -9,6 +10,7 @@ import { AnalyticsView } from "../components/dashboard/views/analytics-view";
 import { SettingsView } from "../components/dashboard/views/settings-view";
 import { CommentsView } from "../components/dashboard/views/comments-view";
 import { MediaView } from "../components/dashboard/views/media-view";
+import { useAuth } from "../context/AuthContext";
 
 const VIEW_LABELS: Record<View, string> = {
   overview: "Overview",
@@ -21,10 +23,19 @@ const VIEW_LABELS: Record<View, string> = {
 };
 
 const DashboardPage = () => {
+  const { user, loading } = useAuth();
+  const routerNavigate = useNavigate();
+
   const [view, setView] = useState<View>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [publishedToast, setPublishedToast] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      routerNavigate("/signin");
+    }
+  }, [user, loading, routerNavigate]);
 
   const navigate = (v: View) => {
     setView(v);
@@ -40,6 +51,15 @@ const DashboardPage = () => {
       setTimeout(() => setSavedToast(false), 3000);
     }
   };
+
+  if (loading || !user) {
+    return (
+      <div className="h-screen bg-[#0C0C0C] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="h-screen bg-[#0C0C0C] flex flex-col font-dm-sans overflow-hidden">

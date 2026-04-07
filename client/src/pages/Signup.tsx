@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
   FaPen,
@@ -10,6 +10,8 @@ import {
   FaCheck,
   FaArrowRight,
 } from "react-icons/fa";
+import { signup } from "../lib/auth";
+import { useAuth } from "../context/AuthContext";
 
 const signUpSchema = z
   .object({
@@ -39,16 +41,7 @@ type FormState = {
 type FormErrors = Partial<Record<keyof FormState, string>>;
 type Status = "idle" | "submitting" | "success";
 
-/* ─────────────────────────────────────────────
-   PASSWORD STRENGTH
-───────────────────────────────────────────── */
-const getStrength = (
-  pw: string,
-): {
-  level: number;
-  label: string;
-  color: string;
-} => {
+const getStrength = (pw: string): { level: number; label: string; color: string } => {
   let score = 0;
   if (pw.length >= 8) score++;
   if (/[A-Z]/.test(pw)) score++;
@@ -60,9 +53,6 @@ const getStrength = (
   return { level: score, label: "Strong", color: "#10B981" };
 };
 
-/* ─────────────────────────────────────────────
-   PAGE
-───────────────────────────────────────────── */
 const PERKS = [
   "Verified author badge on every post",
   "Built-in audience discovery tools",
@@ -71,6 +61,9 @@ const PERKS = [
 ];
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
+
   const [form, setForm] = useState<FormState>({
     fullName: "",
     email: "",
@@ -82,10 +75,10 @@ const SignUpPage = () => {
   const [showCPw, setShowCPw] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<Status>("idle");
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const strength = getStrength(form.password);
 
-  /* ── Zod validation ── */
   const validate = (): boolean => {
     const result = signUpSchema.safeParse(form);
     if (result.success) {
@@ -109,13 +102,32 @@ const SignUpPage = () => {
     }));
     if (errors[name as keyof FormState])
       setErrors((prev) => ({ ...prev, [name]: undefined }));
+    if (serverError) setServerError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     setStatus("submitting");
-    setTimeout(() => setStatus("success"), 2000);
+    setServerError(null);
+
+    try {
+      const res = await signup({
+        fullname: form.fullName,
+        email: form.email,
+        password: form.password,
+      });
+      setUser(res.data);
+      setStatus("success");
+      
+      const role = res.data.role?.name || "READER";
+      const target = role === "ADMIN" ? "/admin" : role === "WRITER" ? "/dashboard" : "/";
+      
+      setTimeout(() => navigate(target), 1200);
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : "Something went wrong");
+      setStatus("idle");
+    }
   };
 
   const inputBase =
@@ -306,7 +318,7 @@ const SignUpPage = () => {
                 >
                   Create your account
                 </h1>
-                <p className="text-white/40 text-sm">
+                <p className="text-white/40 text-sm mb-4">
                   Already have an account?{" "}
                   <Link
                     to="/signin"
@@ -315,6 +327,11 @@ const SignUpPage = () => {
                     Sign in
                   </Link>
                 </p>
+                {serverError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm">
+                    {serverError}
+                  </div>
+                )}
               </div>
 
               <form

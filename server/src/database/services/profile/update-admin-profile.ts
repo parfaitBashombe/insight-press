@@ -1,22 +1,27 @@
 import BaseService from "@/database/system/base-service.js";
-import { type admin_profile } from "@/generated/prisma/client.js";
+import { type user } from "@/generated/prisma/client.js";
 
 interface UpdateAdminProfilePayload {
   userId: string;
   department?: string;
 }
 
-class UpdateAdminProfileService extends BaseService<UpdateAdminProfilePayload, admin_profile> {
-  protected async transaction(data: UpdateAdminProfilePayload): Promise<admin_profile | null> {
-    const existingProfile = await this.database.admin_profile.findUnique({
+class UpdateAdminProfileService extends BaseService<
+  UpdateAdminProfilePayload,
+  user
+> {
+  protected async transaction(
+    data: UpdateAdminProfilePayload,
+  ): Promise<user | null> {
+    const existingProfile = await this.database.user.findUnique({
       where: { user_id: data.userId },
     });
 
     if (!existingProfile) {
-      throw new Error("Admin profile does not exist. Your promotion request must be approved first.");
+      throw new Error("User does not exist.");
     }
 
-    return await this.database.admin_profile.update({
+    return await this.database.user.update({
       where: { user_id: data.userId },
       data: {
         ...(data.department !== undefined && { department: data.department }),

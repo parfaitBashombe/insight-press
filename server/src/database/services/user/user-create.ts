@@ -1,9 +1,11 @@
 import BaseService from "@/database/system/base-service.js";
-import { user } from "@/generated/prisma/client.js";
+import { type user, type role } from "@/generated/prisma/client.js";
 import { Signup } from "@/types/user.js";
 
-class CreateUserService extends BaseService<Signup, user> {
-  protected async transaction(data: Signup): Promise<user | null> {
+type UserWithRole = user & { role: role };
+
+class CreateUserService extends BaseService<Signup, UserWithRole> {
+  protected async transaction(data: Signup): Promise<UserWithRole | null> {
     const salt = this.Password.salt();
     const password = this.Password.hash(data.password, salt);
 
@@ -24,6 +26,9 @@ class CreateUserService extends BaseService<Signup, user> {
         password,
         salt,
         role_id: readerRole.role_id,
+      },
+      include: {
+        role: true,
       },
     });
 

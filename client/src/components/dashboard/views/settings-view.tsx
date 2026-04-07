@@ -1,50 +1,93 @@
+import { useState } from "react";
 import { FaPen } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa6";
+import { useAuth } from "../../../context/AuthContext";
+import { updateProfile } from "../../../lib/auth";
 
-export const SettingsView = () => (
-  <div className="max-w-6xl mx-auto space-y-8">
-    {/* Public Profile */}
-    <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
-      <h3 className="text-white font-bold text-lg mb-6 font-playfair">Public Profile</h3>
-      <div className="flex flex-col sm:flex-row gap-8 items-start">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-24 h-24 rounded-full bg-amber-400 flex items-center justify-center text-3xl font-bold text-[#0C0C0C] shrink-0 relative group cursor-pointer">
-            AO
-            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <FaPen size={16} className="text-white" />
+export const SettingsView = () => {
+  const { user, updateUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  
+  const [form, setForm] = useState({
+    fullname: user?.fullname || "",
+    bio: user?.bio || "",
+  });
+
+  const initials = form.fullname
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleUpdate = async () => {
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      const res = await updateProfile(user.user_id, {
+        fullname: form.fullname,
+        bio: form.bio || undefined,
+      });
+      updateUser(res.data);
+    } catch {
+      // Toast/error handling would go here
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Public Profile */}
+      <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
+        <h3 className="text-white font-bold text-lg mb-6 font-playfair">Public Profile</h3>
+        <div className="flex flex-col sm:flex-row gap-8 items-start">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-24 h-24 rounded-full bg-amber-400 flex items-center justify-center text-3xl font-bold text-[#0C0C0C] shrink-0 relative group cursor-pointer overflow-hidden">
+              {initials}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <FaPen size={16} className="text-white" />
+              </div>
             </div>
+            <button className="text-white/40 hover:text-white text-xs font-semibold transition-colors">
+              Change Avatar
+            </button>
           </div>
-          <button className="text-white/40 hover:text-white text-xs font-semibold transition-colors">
-            Change Avatar
-          </button>
-        </div>
 
-        <div className="flex-1 space-y-5 w-full">
-          <div className="space-y-1.5">
-            <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">
-              Display Name
-            </label>
-            <input
-              type="text"
-              defaultValue="Amara Osei"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
-            />
+          <div className="flex-1 space-y-5 w-full">
+            <div className="space-y-1.5">
+              <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">
+                Display Name
+              </label>
+              <input
+                type="text"
+                value={form.fullname}
+                onChange={(e) => setForm({ ...form, fullname: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors"
+                placeholder="Your full name"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Bio</label>
+              <textarea
+                rows={4}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors resize-none"
+                placeholder="Tell us about yourself..."
+              />
+              <p className="text-white/30 text-xs text-right">{form.bio.length}/160</p>
+            </div>
+            <button 
+              onClick={handleUpdate}
+              disabled={submitting}
+              className="bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200 disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : "Save Changes"}
+            </button>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Bio</label>
-            <textarea
-              rows={4}
-              defaultValue="Writing about design, technology, and the intersections between them. Verified Author at Insight Press."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-400/50 transition-colors resize-none"
-            />
-            <p className="text-white/30 text-xs text-right">0/160</p>
-          </div>
-          <button className="bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-6 py-2.5 rounded-full text-sm transition-all duration-200">
-            Save Changes
-          </button>
         </div>
       </div>
-    </div>
 
     {/* Account Settings */}
     <div className="bg-white/4 border border-white/8 rounded-2xl p-6 sm:p-8">
@@ -94,4 +137,5 @@ export const SettingsView = () => (
       </button>
     </div>
   </div>
-);
+  );
+};

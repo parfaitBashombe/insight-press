@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
   FaPen,
@@ -9,6 +9,8 @@ import {
   FaArrowRight,
   FaCheckCircle,
 } from "react-icons/fa";
+import { signin } from "../lib/auth";
+import { useAuth } from "../context/AuthContext";
 
 // ── Zod schema ──────────────────────────────────────────────────────────────
 const signInSchema = z.object({
@@ -48,6 +50,9 @@ const RECENT_POSTS = [
 ];
 
 const SignInPage = () => {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
+
   const [form, setForm] = useState<FormState>({
     email: "",
     password: "",
@@ -84,11 +89,26 @@ const SignInPage = () => {
     if (status === "error") setStatus("idle");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     setStatus("submitting");
-    setTimeout(() => setStatus("success"), 1800);
+    
+    try {
+      const res = await signin({
+        email: form.email,
+        password: form.password,
+      });
+      setUser(res.data);
+      setStatus("success");
+
+      const role = res.data.role?.name || "READER";
+      const target = role === "ADMIN" ? "/admin" : role === "WRITER" ? "/dashboard" : "/";
+      
+      setTimeout(() => navigate(target), 1200);
+    } catch {
+      setStatus("error");
+    }
   };
 
   const inputBase =
