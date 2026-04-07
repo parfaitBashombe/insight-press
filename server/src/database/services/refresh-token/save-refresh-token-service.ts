@@ -1,5 +1,5 @@
 import BaseService from "@/database/system/base-service.js";
-import { type RefreshToken } from "@/generated/prisma/client.js";
+import { type refresh_token } from "@/generated/prisma/client.js";
 
 interface SaveRefreshTokenInput {
   userId: string;
@@ -8,12 +8,12 @@ interface SaveRefreshTokenInput {
 
 class SaveRefreshTokenService extends BaseService<
   SaveRefreshTokenInput,
-  RefreshToken
+  refresh_token
 > {
   protected async transaction(
     data: SaveRefreshTokenInput,
-  ): Promise<RefreshToken | null> {
-    return await this.database.refreshToken.create({
+  ): Promise<refresh_token | null> {
+    return await this.database.refresh_token.create({
       data: {
         token: data.token,
         user_id: data.userId,

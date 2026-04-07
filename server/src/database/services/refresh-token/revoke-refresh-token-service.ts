@@ -1,9 +1,9 @@
 import BaseService from "@/database/system/base-service.js";
-import { RefreshToken } from "@/generated/prisma/client.js";
+import { refresh_token } from "@/generated/prisma/client.js";
 
-class RevokeRefreshTokenService extends BaseService<string, RefreshToken> {
-  protected async transaction(token: string): Promise<RefreshToken | null> {
-    return await this.database.refreshToken.delete({
+class RevokeRefreshTokenService extends BaseService<string, refresh_token> {
+  protected async transaction(token: string): Promise<refresh_token | null> {
+    return await this.database.refresh_token.delete({
       where: { token },
     });
   }

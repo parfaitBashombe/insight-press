@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "@/generated/prisma/client.js";
+import { user } from "@/generated/prisma/client.js";
 
 import BaseControlller from "@/core/base/base-controller.js";
 import {
@@ -12,7 +12,7 @@ class CreateUserController extends BaseControlller {
     req: Request,
     res: Response,
   ): Promise<void | Response> {
-    const data: User = req.body;
+    const data: user = req.body;
 
     const result = await this.Service.UserServices.CreateUser.call(data);
 
@@ -24,7 +24,7 @@ class CreateUserController extends BaseControlller {
       );
     }
 
-    const userData = this.Utils.omitProperty(result as User, [
+    const userData = this.Utils.omitProperty(result as user, [
       "password",
       "salt",
       "status",

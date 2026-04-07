@@ -1,5 +1,5 @@
 import BaseControlller from "@/core/base/base-controller.js";
-import { User } from "@/generated/prisma/client.js";
+import { user } from "@/generated/prisma/client.js";
 import { Request, Response } from "express";
 import {
   setAccessCookie,
@@ -11,7 +11,7 @@ class UpdateUserController extends BaseControlller {
     req: Request,
     res: Response,
   ): Promise<void | Response> {
-    const data: User = req.body;
+    const data: user = req.body;
     const user = req.currentUser;
 
     if (!user) {
@@ -35,7 +35,7 @@ class UpdateUserController extends BaseControlller {
       );
     }
 
-    const userData = this.Utils.omitProperty(result as User, [
+    const userData = this.Utils.omitProperty(result as user, [
       "salt",
       "password",
       "status",

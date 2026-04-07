@@ -4,6 +4,13 @@ export type Signup = {
   password: string;
 };
 
+export type UserUpdate = {
+  fullname?: string;
+  bio?: string;
+  twitter?: string;
+  department?: string;
+};
+
 export type JwtPayload = {
   payload: {
     user_id: string;

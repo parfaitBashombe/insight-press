@@ -12,37 +12,63 @@ datasource db {
   provider = "postgresql"
 }
 
-model UserProfile {
-  user_profile_id String @id @default(uuid())
-  user_id         String
-  User            User   @relation(fields: [user_id], references: [user_id])
-  createdAt       DateTime @default(now())
-
-  @@map("user_profiles")
+enum promotion_status {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
-model User {
-  user_id       String         @id @default(uuid())
-  email         String         @unique
-  fullname      String
-  password      String
-  salt          String
-  status        Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  UserProfile   UserProfile[]
-  RefreshTokens RefreshToken[]
+model role {
+  role_id           String             @id @default(uuid())
+  name              String             @unique
+  description       String?
+  users             user[]
+  promotion_requests promotion_request[]
+
+  @@map("roles")
+}
+
+model user {
+  user_id           String             @id @default(uuid())
+  role_id           String
+  role              role               @relation(fields: [role_id], references: [role_id])
+  email             String             @unique
+  fullname          String
+  password          String
+  salt              String
+  status            Boolean            @default(true)
+  bio               String?
+  twitter           String?
+  department        String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  refresh_tokens     refresh_token[]
+  promotion_requests promotion_request[]
 
   @@map("users")
 }
 
-model RefreshToken {
+model refresh_token {
   id        String   @id @default(uuid())
   token     String   @unique
   user_id   String
-  User      User   @relation(fields: [user_id], references: [user_id])
+  user      user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   expiresAt DateTime
-  createdAt DateTime @default(now())
-
   @@map("refresh_tokens")
+}
+
+model promotion_request {
+  promotion_request_id String          @id @default(uuid())
+  user_id              String
+  user                 user            @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  role_id              String
+  role                 role            @relation(fields: [role_id], references: [role_id])
+  reason               String
+  status               promotion_status @default(PENDING)
+  reviewed_at          DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  @@map("promotion_requests")
 }

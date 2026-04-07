@@ -1,8 +1,8 @@
 import BaseService from "@/database/system/base-service.js";
-import { User } from "@/generated/prisma/client.js";
+import { user } from "@/generated/prisma/client.js";
 
-class GetOneUserByEmailService extends BaseService<string, User> {
-  protected async transaction(email: string): Promise<User | null> {
+class GetOneUserByEmailService extends BaseService<string, user> {
+  protected async transaction(email: string): Promise<user | null> {
     const result = await this.database.user.findUnique({
       where: { email },
     });

@@ -9,8 +9,9 @@ class UpdateUserValidator extends BaseMiddleWare {
   ): Promise<void> {
     const schema = this.z.object({
       fullname: this.z.string().optional(),
-      email: this.z.string().email().optional(),
-      password: this.z.string().min(6).optional(),
+      bio: this.z.string().optional(),
+      twitter: this.z.string().optional(),
+      department: this.z.string().optional(),
     });
 
     this.bodyHandler(req, res, next, schema);
