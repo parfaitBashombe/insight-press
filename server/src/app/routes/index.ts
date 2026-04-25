@@ -3,6 +3,7 @@ import UserRoutes from "@/app/routes/user/index.js";
 import PromotionRoutes from "@/app/routes/promotion/index.js";
 import ProfileRoutes from "@/app/routes/profile/index.js";
 import AdminRoutes from "@/app/routes/admin/index.js";
+import WriterRoutes from "@/app/routes/writer/index.js";
 
 const routes: IRoute[] = [
   ...Object.values({
@@ -10,6 +11,7 @@ const routes: IRoute[] = [
     ...PromotionRoutes,
     ...ProfileRoutes,
     ...AdminRoutes,
+    ...WriterRoutes,
   }),
 ];
 

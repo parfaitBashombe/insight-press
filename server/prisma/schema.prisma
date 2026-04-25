@@ -18,6 +18,12 @@ enum promotion_status {
   REJECTED
 }
 
+enum article_status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model role {
   role_id           String             @id @default(uuid())
   name              String             @unique
@@ -45,6 +51,7 @@ model user {
 
   refresh_tokens     refresh_token[]
   promotion_requests promotion_request[]
+  articles           article[]
 
   @@map("users")
 }
@@ -71,4 +78,20 @@ model promotion_request {
   updatedAt            DateTime        @updatedAt
 
   @@map("promotion_requests")
+}
+
+model article {
+  article_id   String         @id @default(uuid())
+  author_id    String
+  author       user           @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  title        String
+  slug         String         @unique
+  content      String
+  cover_image  String?
+  status       article_status @default(DRAFT)
+  published_at DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("articles")
 }
