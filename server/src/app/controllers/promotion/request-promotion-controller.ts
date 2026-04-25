@@ -7,7 +7,7 @@ import CreatePromotionRequestService from "@/database/services/promotion/create-
 class RequestPromotionController extends BaseControlller {
   protected async module(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void | Response> {
     const data: CreatePromotionRequest = req.body;
     const user = req.currentUser;
@@ -24,26 +24,34 @@ class RequestPromotionController extends BaseControlller {
       const role = await findRoleService.call(data.requested_role);
 
       if (!role) {
-        return this.responseHandler(res, 404, `Role '${data.requested_role}' not found.`);
+        return this.responseHandler(
+          res,
+          404,
+          `Role '${data.requested_role}' not found.`,
+        );
       }
 
       // Check if user already holds this role
       if (user.role_id === role.role_id) {
-        return this.responseHandler(res, 400, `You are already assigned the ${data.requested_role} role.`);
+        return this.responseHandler(
+          res,
+          400,
+          `You are already assigned the ${data.requested_role} role.`,
+        );
       }
 
       // Create the promotion request
       const request = await createRequestService.call({
         userId: user.user_id,
         roleId: role.role_id,
-        reason: data.reason
+        reason: data.reason,
       });
 
       if (!request) {
         return this.responseHandler(
           res,
           500,
-          "An error occurred while creating the promotion request"
+          "An error occurred while creating the promotion request",
         );
       }
 
@@ -51,9 +59,9 @@ class RequestPromotionController extends BaseControlller {
         res,
         201,
         "Promotion request submitted successfully and is pending review.",
-        request
+        request,
       );
-    } catch (error: any) {
+    } catch {
       return this.responseHandler(res, 500, "Internal server error");
     }
   }

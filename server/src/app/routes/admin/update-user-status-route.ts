@@ -28,7 +28,7 @@ class UpdateUserStatusRoute implements IRoute {
       },
       (req: Request, res: Response) => {
         new UpdateUserStatusController().execute(req, res);
-      }
+      },
     );
   }
 }

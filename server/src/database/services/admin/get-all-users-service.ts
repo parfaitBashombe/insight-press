@@ -11,11 +11,12 @@ class GetAllUsersService extends BaseService<void, UserWithoutPassword[]> {
         role: true,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     return users.map((u) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, salt, ...userWithoutSensitiveData } = u;
       return userWithoutSensitiveData;
     });

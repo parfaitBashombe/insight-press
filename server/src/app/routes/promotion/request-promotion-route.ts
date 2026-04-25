@@ -28,7 +28,7 @@ class RequestPromotionRoute implements IRoute {
       },
       (req, res) => {
         new RequestPromotionController().execute(req, res);
-      }
+      },
     );
   }
 }

@@ -25,7 +25,7 @@ class RejectPromotionRoute implements IRoute {
       },
       (req, res) => {
         new RejectPromotionController().execute(req, res);
-      }
+      },
     );
   }
 }
