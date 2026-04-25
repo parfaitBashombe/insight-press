@@ -23,7 +23,7 @@ class UpdateUserController extends BaseControlller {
     }
 
     const result = await this.Service.UserServices.UpdateUser.call({
-      ...data,
+      ...(data as any),
       user_id: user.user_id,
     });
 
