@@ -5,9 +5,11 @@ import UpdateArticleRoute from "@/app/routes/writer/update-article-route.js";
 import DeleteArticleRoute from "@/app/routes/writer/delete-article-route.js";
 import PublishArticleRoute from "@/app/routes/writer/publish-article-route.js";
 import UnpublishArticleRoute from "@/app/routes/writer/unpublish-article-route.js";
+import GetWriterStatsRoute from "@/app/routes/writer/get-writer-stats-route.js";
 
 const PATH = "/writer/articles";
 
+const GetWriterStats = new GetWriterStatsRoute(PATH); // Register stats BEFORE /:id
 const CreateArticle = new CreateArticleRoute(PATH);
 const GetArticles = new GetArticlesRoute(PATH);
 const GetArticle = new GetArticleRoute(PATH);
@@ -17,6 +19,7 @@ const PublishArticle = new PublishArticleRoute(PATH);
 const UnpublishArticle = new UnpublishArticleRoute(PATH);
 
 const WriterRoutes = {
+  GetWriterStats,
   CreateArticle,
   GetArticles,
   GetArticle,

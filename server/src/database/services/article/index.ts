@@ -7,6 +7,8 @@ import PublishArticleService from "@/database/services/article/article-publish.j
 import UnpublishArticleService from "@/database/services/article/article-unpublish.js";
 import GetPublicArticlesService from "@/database/services/article/get-public-articles-service.js";
 import GetPublicArticleBySlugService from "@/database/services/article/get-public-article-by-slug-service.js";
+import GetWriterStatsService from "@/database/services/article/get-writer-stats-service.js";
+import GetPublicAuthorProfileService from "@/database/services/article/get-public-author-profile-service.js";
 
 const CreateArticle = new CreateArticleService();
 const GetArticlesByAuthor = new GetArticlesByAuthorService();
@@ -17,6 +19,8 @@ const PublishArticle = new PublishArticleService();
 const UnpublishArticle = new UnpublishArticleService();
 const GetPublicArticles = new GetPublicArticlesService();
 const GetPublicArticleBySlug = new GetPublicArticleBySlugService();
+const GetWriterStats = new GetWriterStatsService();
+const GetPublicAuthorProfile = new GetPublicAuthorProfileService();
 
 const ArticleServices = {
   CreateArticle,
@@ -28,6 +32,8 @@ const ArticleServices = {
   UnpublishArticle,
   GetPublicArticles,
   GetPublicArticleBySlug,
+  GetWriterStats,
+  GetPublicAuthorProfile,
 };
 
 export default ArticleServices;
