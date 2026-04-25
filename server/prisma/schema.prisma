@@ -49,9 +49,10 @@ model user {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  refresh_tokens     refresh_token[]
-  promotion_requests promotion_request[]
-  articles           article[]
+  refresh_tokens        refresh_token[]
+  promotion_requests    promotion_request[]
+  articles              article[]
+  password_reset_tokens password_reset_token[]
 
   @@map("users")
 }
@@ -94,4 +95,15 @@ model article {
   updatedAt    DateTime       @updatedAt
 
   @@map("articles")
+}
+
+model password_reset_token {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  user_id    String
+  user       user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@map("password_reset_tokens")
 }
