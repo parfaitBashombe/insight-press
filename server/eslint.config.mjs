@@ -17,7 +17,12 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["dist", "node_modules", "package.json"],
+    ignores: [
+      "dist",
+      "node_modules",
+      "package.json",
+      "src/generated/prisma/**",
+    ],
   },
   prettierConfig, // Must be last to override stylistic rules
 );
