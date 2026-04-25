@@ -23,6 +23,7 @@ class UpdateUserController extends BaseControlller {
     }
 
     const result = await this.Service.UserServices.UpdateUser.call({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(data as any),
       user_id: user.user_id,
     });

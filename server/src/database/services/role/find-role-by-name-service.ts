@@ -4,7 +4,7 @@ import { type role } from "@/generated/prisma/client.js";
 class FindRoleByNameService extends BaseService<string, role> {
   protected async transaction(name: string): Promise<role | null> {
     return await this.database.role.findUnique({
-      where: { name }
+      where: { name },
     });
   }
 }

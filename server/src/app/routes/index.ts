@@ -5,7 +5,12 @@ import ProfileRoutes from "@/app/routes/profile/index.js";
 import AdminRoutes from "@/app/routes/admin/index.js";
 
 const routes: IRoute[] = [
-  ...Object.values({ ...UserRoutes, ...PromotionRoutes, ...ProfileRoutes, ...AdminRoutes }),
+  ...Object.values({
+    ...UserRoutes,
+    ...PromotionRoutes,
+    ...ProfileRoutes,
+    ...AdminRoutes,
+  }),
 ];
 
 export default routes;

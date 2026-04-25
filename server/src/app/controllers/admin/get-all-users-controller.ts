@@ -17,7 +17,7 @@ class GetAllUsersController extends BaseController {
         "Users fetched successfully",
         users,
       );
-    } catch (error: unknown) {
+    } catch {
       return this.responseHandler(res, 500, "Internal server error");
     }
   }
