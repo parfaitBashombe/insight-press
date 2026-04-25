@@ -4,6 +4,7 @@ import GetArticleController from "@/app/controllers/writer/get-article-controlle
 import UpdateArticleController from "@/app/controllers/writer/update-article-controller.js";
 import DeleteArticleController from "@/app/controllers/writer/delete-article-controller.js";
 import PublishArticleController from "@/app/controllers/writer/publish-article-controller.js";
+import UnpublishArticleController from "@/app/controllers/writer/unpublish-article-controller.js";
 
 const CreateArticle = new CreateArticleController();
 const GetArticles = new GetArticlesController();
@@ -11,6 +12,7 @@ const GetArticle = new GetArticleController();
 const UpdateArticle = new UpdateArticleController();
 const DeleteArticle = new DeleteArticleController();
 const PublishArticle = new PublishArticleController();
+const UnpublishArticle = new UnpublishArticleController();
 
 const WriterControllers = {
   CreateArticle,
@@ -19,6 +21,7 @@ const WriterControllers = {
   UpdateArticle,
   DeleteArticle,
   PublishArticle,
+  UnpublishArticle,
 };
 
 export default WriterControllers;

@@ -5,6 +5,7 @@ import ProfileRoutes from "@/app/routes/profile/index.js";
 import AdminRoutes from "@/app/routes/admin/index.js";
 import WriterRoutes from "@/app/routes/writer/index.js";
 import ReaderRoutes from "@/app/routes/reader/index.js";
+import MediaRoutes from "@/app/routes/media/index.js";
 
 const routes: IRoute[] = [
   ...Object.values({
@@ -14,6 +15,7 @@ const routes: IRoute[] = [
     ...AdminRoutes,
     ...WriterRoutes,
     ...ReaderRoutes,
+    ...MediaRoutes,
   }),
 ];
 
