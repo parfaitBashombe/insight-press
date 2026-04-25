@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import BaseController from "@/core/base/base-controller.js";
-import GetAllUsersService from "@/database/services/admin/get-all-users-service.js";
 
-class GetAllUsersController extends BaseController {
+class GetArticlesController extends BaseController {
   protected async module(
     req: Request,
     res: Response,
@@ -11,27 +10,21 @@ class GetAllUsersController extends BaseController {
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = parseInt(req.query.pageSize as string) || 10;
       const search = req.query.search as string | undefined;
-      const roleId = req.query.roleId as string | undefined;
-      let status: boolean | undefined = undefined;
+      const authorId = req.query.authorId as string | undefined;
 
-      if (req.query.status !== undefined) {
-        status = req.query.status === "true";
-      }
-
-      const getService = new GetAllUsersService();
-      const users = await getService.call({
-        page,
-        pageSize,
-        search,
-        status,
-        roleId,
-      });
+      const articles =
+        await this.Service.ArticleServices.GetPublicArticles.call({
+          page,
+          pageSize,
+          search,
+          authorId,
+        });
 
       return this.responseHandler(
         res,
         this.SUCCESS_CODE,
-        "Users fetched successfully",
-        users,
+        "Articles fetched successfully",
+        articles,
       );
     } catch {
       return this.responseHandler(
@@ -43,4 +36,4 @@ class GetAllUsersController extends BaseController {
   }
 }
 
-export default GetAllUsersController;
+export default GetArticlesController;
