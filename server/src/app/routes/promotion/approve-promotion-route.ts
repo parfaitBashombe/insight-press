@@ -1,7 +1,6 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { IRoute } from "@/types/app.js";
-import Authentication from "@/app/middlewares/user/authentication.js";
-import RequireRoleMiddleware from "@/app/middlewares/user/require-role.js";
+import MiddleWares from "@/app/middlewares/index.js";
 import ApprovePromotionController from "@/app/controllers/promotion/approve-promotion-controller.js";
 
 class ApprovePromotionRoute implements IRoute {
@@ -16,12 +15,11 @@ class ApprovePromotionRoute implements IRoute {
   private initializeRoutes() {
     this.router.post(
       this.path,
-      (req, res, next) => {
-        new Authentication().run(req, res, next);
+      (req: Request, res: Response, next: NextFunction) => {
+        MiddleWares.UserMiddleWares.UserAuth.run(req, res, next);
       },
-      (req, res, next) => {
-        // Only an Admin can approve promotions
-        new RequireRoleMiddleware(["ADMIN"]).run(req, res, next);
+      (req: Request, res: Response, next: NextFunction) => {
+        MiddleWares.AdminMiddleWares.IsAdmin.run(req, res, next);
       },
       (req, res) => {
         new ApprovePromotionController().execute(req, res);

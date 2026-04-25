@@ -1,7 +1,6 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { IRoute } from "@/types/app.js";
-import Authentication from "@/app/middlewares/user/authentication.js";
-import RequireRoleMiddleware from "@/app/middlewares/user/require-role.js";
+import MiddleWares from "@/app/middlewares/index.js";
 import GetAllUsersController from "@/app/controllers/admin/get-all-users-controller.js";
 
 class GetAllUsersRoute implements IRoute {
@@ -16,12 +15,11 @@ class GetAllUsersRoute implements IRoute {
   private initializeRoutes() {
     this.router.get(
       this.path,
-      (req, res, next) => {
-        new Authentication().run(req, res, next);
+      (req: Request, res: Response, next: NextFunction) => {
+        MiddleWares.UserMiddleWares.UserAuth.run(req, res, next);
       },
-      (req, res, next) => {
-        // Only an Admin can view all users
-        new RequireRoleMiddleware(["ADMIN"]).run(req, res, next);
+      (req: Request, res: Response, next: NextFunction) => {
+        MiddleWares.AdminMiddleWares.IsAdmin.run(req, res, next);
       },
       (req, res) => {
         new GetAllUsersController().execute(req, res);
