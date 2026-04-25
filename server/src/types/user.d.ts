@@ -27,3 +27,21 @@ export type LogIn = {
   fullname?: string;
   password: string;
 };
+
+export type GetAllUsersFilters = {
+  page: number;
+  pageSize: number;
+  search?: string;
+  status?: boolean;
+  roleId?: string;
+};
+
+export type PaginatedUsers = {
+  data: Omit<
+    import("@/generated/prisma/client.js").user,
+    "password" | "salt"
+  >[];
+  total: number;
+  page: number;
+  totalPages: number;
+};
