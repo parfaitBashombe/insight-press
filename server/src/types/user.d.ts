@@ -45,3 +45,8 @@ export type PaginatedUsers = {
   page: number;
   totalPages: number;
 };
+
+export type ChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};
