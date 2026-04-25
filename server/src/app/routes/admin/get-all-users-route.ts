@@ -25,7 +25,7 @@ class GetAllUsersRoute implements IRoute {
       },
       (req, res) => {
         new GetAllUsersController().execute(req, res);
-      }
+      },
     );
   }
 }

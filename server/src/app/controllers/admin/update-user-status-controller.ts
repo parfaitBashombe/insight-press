@@ -23,6 +23,7 @@ class UpdateUserStatusController extends BaseController {
       }
 
       // We should omit sensitive data before sending back
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, salt, ...safeUser } = updatedUser;
 
       return this.responseHandler(

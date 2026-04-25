@@ -6,7 +6,10 @@ type UpdateUserStatusParams = {
   status: boolean;
 };
 
-class UpdateUserStatusService extends BaseService<UpdateUserStatusParams, user> {
+class UpdateUserStatusService extends BaseService<
+  UpdateUserStatusParams,
+  user
+> {
   protected async transaction(params: UpdateUserStatusParams): Promise<user> {
     const { userId, status } = params;
 

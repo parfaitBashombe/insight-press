@@ -25,7 +25,7 @@ class ApprovePromotionRoute implements IRoute {
       },
       (req, res) => {
         new ApprovePromotionController().execute(req, res);
-      }
+      },
     );
   }
 }

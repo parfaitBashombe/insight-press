@@ -28,7 +28,7 @@ class UpdateUserRoleRoute implements IRoute {
       },
       (req: Request, res: Response) => {
         new UpdateUserRoleController().execute(req, res);
-      }
+      },
     );
   }
 }

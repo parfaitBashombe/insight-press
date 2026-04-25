@@ -24,7 +24,7 @@ class AdminProfileRoute implements IRoute {
       },
       (req, res) => {
         new UpdateAdminProfileController().execute(req, res);
-      }
+      },
     );
   }
 }

@@ -17,7 +17,7 @@ class GetPromotionRequestsController extends BaseController {
         "Promotion requests fetched successfully",
         requests,
       );
-    } catch (error: unknown) {
+    } catch {
       return this.responseHandler(res, 500, "Internal server error");
     }
   }
