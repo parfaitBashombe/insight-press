@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getProfile, logout as apiLogout, type User } from "../lib/auth";
+import { getProfile, logout as apiLogout } from "@/lib/api/auth";
+import type { User } from "@/types/auth";
 
 type AuthContextType = {
   user: User | null;
@@ -38,7 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");

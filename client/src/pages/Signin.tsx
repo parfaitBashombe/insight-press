@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { signinSchema, type SigninFormValues } from "@/lib/validators/auth";
 import {
   FaPen,
   FaFeatherAlt,
@@ -9,21 +9,12 @@ import {
   FaArrowRight,
   FaCheckCircle,
 } from "react-icons/fa";
-import { signin } from "../lib/auth";
-import { useAuth } from "../context/AuthContext";
+import { signin } from "@/lib/api/auth";
+import { useAuth } from "@/context/AuthContext";
 
-// ── Zod schema ──────────────────────────────────────────────────────────────
-const signInSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-  remember: z.boolean(),
-});
-
-type FormState = z.infer<typeof signInSchema>;
+type FormState = SigninFormValues;
 type FormErrors = Partial<Record<keyof FormState, string>>;
 type Status = "idle" | "submitting" | "success" | "error";
-
-// ────────────────────────────────────────────────────────────────────────────
 
 const RECENT_POSTS = [
   {
@@ -64,7 +55,7 @@ const SignInPage = () => {
 
   // ── Validation via Zod ────────────────────────────────────────────────────
   const validate = (): boolean => {
-    const result = signInSchema.safeParse(form);
+    const result = signinSchema.safeParse(form);
     if (result.success) {
       setErrors({});
       return true;
@@ -102,10 +93,7 @@ const SignInPage = () => {
       setUser(res.data);
       setStatus("success");
 
-      const role = res.data.role?.name || "READER";
-      const target = role === "ADMIN" ? "/admin" : role === "WRITER" ? "/dashboard" : "/";
-      
-      setTimeout(() => navigate(target), 1200);
+      setTimeout(() => navigate("/dashboard"), 1200);
     } catch {
       setStatus("error");
     }

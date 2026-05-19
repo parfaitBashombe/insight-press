@@ -1,5 +1,5 @@
 import { FaTag } from "react-icons/fa6";
-import { COMMENTS } from "../mock-data";
+import { COMMENTS } from "@/components/dashboard/mock-data";
 
 export const CommentsView = () => (
   <div className="max-w-6xl mx-auto space-y-6">

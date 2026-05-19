@@ -1,4 +1,4 @@
-import { STATS, POSTS, ANALYTICS_DATA, MAX_VIEWS } from "../mock-data";
+import { STATS, POSTS, ANALYTICS_DATA, MAX_VIEWS } from "@/components/dashboard/mock-data";
 
 export const AnalyticsView = () => (
   <div className="max-w-6xl mx-auto space-y-8">

@@ -1,42 +1,5 @@
-import apiFetch from "./api";
-
-export type User = {
-  user_id: string;
-  fullname: string;
-  email: string;
-  role_id: string;
-  role?: {
-    name: string;
-  };
-  bio?: string | null;
-  twitter?: string | null;
-  department?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ApiResponse<T> = {
-  data: T;
-  message: string;
-};
-
-export type SignupPayload = {
-  fullname: string;
-  email: string;
-  password: string;
-};
-
-export type SigninPayload = {
-  email: string;
-  password: string;
-};
-
-export type UpdateProfilePayload = {
-  fullname?: string;
-  bio?: string;
-  twitter?: string;
-  department?: string;
-};
+import apiFetch from "@/lib/api/index";
+import type { User, ApiResponse, SignupPayload, SigninPayload, UpdateProfilePayload } from "@/types/auth";
 
 export const signup = (payload: SignupPayload) =>
   apiFetch<ApiResponse<User>>("/auth/signup", {
@@ -61,3 +24,15 @@ export const updateProfile = (userId: string, payload: UpdateProfilePayload) =>
 
 export const logout = () =>
   apiFetch<ApiResponse<null>>("/auth/logout", { method: "POST" });
+
+export const changePassword = (payload: { currentPassword: string; newPassword: string }) =>
+  apiFetch<ApiResponse<null>>("/auth/password", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const requestPromotion = (payload: { role_id: string; reason: string }) =>
+  apiFetch<ApiResponse<null>>("/promotion/request", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });

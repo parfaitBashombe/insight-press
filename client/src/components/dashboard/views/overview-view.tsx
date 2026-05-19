@@ -1,6 +1,6 @@
 import { FaEye, FaFeatherAlt, FaArrowRight } from "react-icons/fa";
-import { STATS, POSTS } from "../mock-data";
-import type { View } from "../types";
+import { STATS, POSTS } from "@/components/dashboard/mock-data";
+import type { View } from "@/components/dashboard/types";
 
 interface Props {
   navigate: (v: View) => void;
