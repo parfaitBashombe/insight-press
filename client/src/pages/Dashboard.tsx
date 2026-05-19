@@ -16,6 +16,7 @@ import { AdminPromotionsView } from "@/components/dashboard/views/admin-promotio
 import { ReaderOverviewView } from "@/components/dashboard/views/reader-overview-view";
 import { useAuth } from "@/context/AuthContext";
 import type { Article } from "@/types/writer";
+import { NotificationPanel } from "@/components/dashboard/notification-panel";
 
 const VIEW_LABELS: Record<View, string> = {
   overview: "Overview",
@@ -161,6 +162,7 @@ const DashboardPage = () => {
                 {VIEW_LABELS[currentView]}
               </h2>
             </div>
+            <NotificationPanel />
             {showNewPostButton && (
               <button
                 onClick={() => navigateTo("new-post")}

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaClock, FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaClock, FaCalendar, FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { FaFeatherAlt } from "react-icons/fa";
 import { getArticleBySlug } from "@/lib/api/reader";
+import { followWriter, unfollowWriter, getFollowStatus } from "@/lib/api/follow";
+import { useAuth } from "@/context/AuthContext";
 import type { PublicArticle } from "@/types/reader";
 
 const QUILL_PROSE = `
@@ -36,9 +38,13 @@ const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS
 
 const ArticleDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
+
   const [article, setArticle] = useState<PublicArticle | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -49,6 +55,30 @@ const ArticleDetailPage = () => {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!user || !article) return;
+    getFollowStatus(article.author_id)
+      .then((res) => setFollowing(res.data.following))
+      .catch(() => {});
+  }, [user, article?.author_id]);
+
+  const handleFollow = async () => {
+    if (!user || !article) return;
+    setFollowLoading(true);
+    try {
+      if (following) {
+        await unfollowWriter(article.author_id);
+        setFollowing(false);
+      } else {
+        await followWriter(article.author_id);
+        setFollowing(true);
+      }
+    } catch {
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -64,10 +94,7 @@ const ArticleDetailPage = () => {
         <FaFeatherAlt size={36} className="text-amber-400/40" />
         <h1 className="text-[#1a1a1a] text-2xl font-bold font-playfair">Article not found</h1>
         <p className="text-[#6b6b6b] text-sm">It may have been removed or the link is incorrect.</p>
-        <Link
-          to="/blogs"
-          className="inline-flex items-center gap-2 text-amber-600 font-medium text-sm hover:underline mt-2"
-        >
+        <Link to="/blogs" className="inline-flex items-center gap-2 text-amber-600 font-medium text-sm hover:underline mt-2">
           <FaArrowLeft size={12} /> Back to all posts
         </Link>
       </div>
@@ -76,6 +103,7 @@ const ArticleDetailPage = () => {
 
   const color = accentFor(article.article_id);
   const mins = readingTime(article.content);
+  const isOwnArticle = user?.user_id === article.author_id;
 
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -83,10 +111,7 @@ const ArticleDetailPage = () => {
 
       <div className="bg-[#0C0C0C] pt-24 pb-12 px-6">
         <div className="max-w-3xl mx-auto">
-          <Link
-            to="/blogs"
-            className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm transition-colors mb-8"
-          >
+          <Link to="/blogs" className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm transition-colors mb-8">
             <FaArrowLeft size={11} /> All posts
           </Link>
 
@@ -95,15 +120,20 @@ const ArticleDetailPage = () => {
           </h1>
 
           <div className="flex flex-wrap items-center gap-5 text-white/40 text-sm">
-            <div className="flex items-center gap-2.5">
+            <Link
+              to={`/authors/${article.author_id}`}
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+            >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                 style={{ backgroundColor: color }}
               >
                 {authorInitials(article.author.fullname)}
               </div>
-              <span className="text-white/70 font-medium">{article.author.fullname}</span>
-            </div>
+              <span className="text-white/70 font-medium hover:text-white transition-colors">
+                {article.author.fullname}
+              </span>
+            </Link>
             <span className="flex items-center gap-1.5">
               <FaCalendar size={11} className="text-amber-400/60" />
               {formatDate(article.published_at)}
@@ -128,20 +158,48 @@ const ArticleDetailPage = () => {
 
       <main className="bg-[#F8F6F1] px-6 py-14">
         <div className="max-w-3xl mx-auto">
-          {article.author.bio && (
-            <div className="flex items-start gap-4 bg-white border border-[#E8E4DC] rounded-2xl p-5 mb-10">
+          <div className="flex items-start justify-between gap-4 bg-white border border-[#E8E4DC] rounded-2xl p-5 mb-10">
+            <Link to={`/authors/${article.author_id}`} className="flex items-start gap-4 flex-1 min-w-0 hover:opacity-80 transition-opacity">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
                 style={{ backgroundColor: color }}
               >
                 {authorInitials(article.author.fullname)}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[#1a1a1a] text-sm font-semibold mb-0.5">{article.author.fullname}</p>
-                <p className="text-[#6b6b6b] text-xs leading-relaxed">{article.author.bio}</p>
+                {article.author.bio ? (
+                  <p className="text-[#6b6b6b] text-xs leading-relaxed">{article.author.bio}</p>
+                ) : (
+                  <p className="text-[#9b9b9b] text-xs">View all articles →</p>
+                )}
               </div>
-            </div>
-          )}
+            </Link>
+
+            {!isOwnArticle && (
+              user ? (
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`cursor-pointer shrink-0 inline-flex items-center gap-2 font-bold px-4 py-2 rounded-full text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    following
+                      ? "bg-[#F0EDE7] border border-[#E8E4DC] text-[#6b6b6b] hover:bg-[#E8E4DC]"
+                      : "bg-amber-400 hover:bg-amber-300 text-[#0C0C0C]"
+                  }`}
+                >
+                  {following ? <FaUserCheck size={11} /> : <FaUserPlus size={11} />}
+                  {following ? "Following" : "Follow"}
+                </button>
+              ) : (
+                <Link
+                  to="/signin"
+                  className="shrink-0 inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all"
+                >
+                  <FaUserPlus size={11} /> Follow
+                </Link>
+              )
+            )}
+          </div>
 
           <div
             className="article-body"
@@ -149,10 +207,7 @@ const ArticleDetailPage = () => {
           />
 
           <div className="mt-14 pt-10 border-t border-[#E8E4DC] flex items-center justify-between flex-wrap gap-4">
-            <Link
-              to="/blogs"
-              className="inline-flex items-center gap-2 text-amber-600 font-medium text-sm hover:underline"
-            >
+            <Link to="/blogs" className="inline-flex items-center gap-2 text-amber-600 font-medium text-sm hover:underline">
               <FaArrowLeft size={12} /> Back to all posts
             </Link>
             <p className="text-[#9b9b9b] text-xs">Published on {formatDate(article.published_at)}</p>

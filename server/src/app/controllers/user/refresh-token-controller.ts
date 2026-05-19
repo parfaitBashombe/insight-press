@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import BaseController from "@/core/base/base-controller.js";
+import { user } from "@/generated/prisma/client.js";
 import {
   setAccessCookie,
   setRefreshCookie,
@@ -60,8 +61,14 @@ class RefreshTokenController extends BaseController {
       incomingRefreshToken,
     );
 
-    const payload = decoded.payload;
-    const newAccessToken = this.Utils.Token.generateAccess(payload);
+    // Re-fetch current user so the new access token always carries full user data
+    const currentUser = await this.Service.UserServices.GetUserById.call(stored.user_id);
+    if (!currentUser) {
+      return this.responseHandler(res, this.UNAUTHORIZED_CODE, "User not found");
+    }
+
+    const userData = this.Utils.omitProperty(currentUser as user, ["salt", "password", "status"]);
+    const newAccessToken = this.Utils.Token.generateAccess(userData);
     const newRefreshToken = this.Utils.Token.generateRefresh({
       userId: stored.user_id,
     });

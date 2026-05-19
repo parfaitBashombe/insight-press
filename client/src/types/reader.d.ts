@@ -23,15 +23,19 @@ export type PublicPaginated = {
   totalPages: number;
 };
 
+export type ProfileArticle = Omit<PublicArticle, "author">;
+
 export type AuthorProfile = {
   author: {
     user_id: string;
     fullname: string;
     bio: string | null;
     twitter: string | null;
+    department: string | null;
     createdAt: string;
+    followerCount: number;
   };
-  articles: PublicArticle[];
+  articles: ProfileArticle[];
   total: number;
 };
 

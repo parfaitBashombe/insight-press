@@ -9,6 +9,7 @@ export type UserUpdate = {
   bio?: string;
   twitter?: string;
   department?: string;
+  avatar?: string;
 };
 
 export type JwtPayload = {

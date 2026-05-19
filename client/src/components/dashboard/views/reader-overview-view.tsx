@@ -1,34 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaFeatherAlt, FaArrowRight } from "react-icons/fa";
-import { getRoles } from "@/lib/api/admin";
 import { requestPromotion } from "@/lib/api/auth";
-import type { Role } from "@/types/admin";
 
 export const ReaderOverviewView = () => {
-  const [writerRole, setWriterRole] = useState<Role | null>(null);
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    getRoles()
-      .then((res) => {
-        const writer = res.data.find((role) => role.name === "WRITER");
-        setWriterRole(writer ?? null);
-      })
-      .catch(() => {});
-  }, []);
-
   const handleSubmit = async () => {
-    if (!writerRole || reason.trim().length < 20) {
+    if (reason.trim().length < 20) {
       setError("Please write at least 20 characters explaining why you'd like to become a writer.");
       return;
     }
     setSubmitting(true);
     setError("");
     try {
-      await requestPromotion({ role_id: writerRole.role_id, reason: reason.trim() });
+      await requestPromotion({ requested_role: "WRITER", reason: reason.trim() });
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");

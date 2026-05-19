@@ -24,6 +24,7 @@ class GetPublicArticlesService extends BaseService<
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { content: { contains: search, mode: "insensitive" } },
+        { author: { fullname: { contains: search, mode: "insensitive" } } },
       ];
     }
 

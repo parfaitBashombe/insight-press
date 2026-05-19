@@ -14,6 +14,7 @@ export type User = {
   bio?: string | null;
   twitter?: string | null;
   department?: string | null;
+  avatar?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -34,4 +35,5 @@ export type UpdateProfilePayload = {
   bio?: string;
   twitter?: string;
   department?: string;
+  avatar?: string;
 };

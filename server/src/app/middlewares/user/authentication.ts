@@ -23,9 +23,21 @@ class UserAuthentication extends BaseMiddleWare {
 
     const payload = decoded.payload as Record<string, unknown>;
 
-    const user = await this.Service.UserServices.GetUserByEmail.call(
-      payload.email as string,
-    );
+    // Tokens generated before the refresh-flow fix only carry userId.
+    // Look up by email when present, otherwise fall back to userId.
+    let user;
+    if (payload.email) {
+      user = await this.Service.UserServices.GetUserByEmail.call(
+        payload.email as string,
+      );
+    } else if (payload.user_id) {
+      user = await this.Service.UserServices.GetUserById.call(
+        payload.user_id as string,
+      );
+    } else {
+      this.responseHandler(res, this.UNAUTHORIZED_CODE, this.UNAUTHORIZED_MSG);
+      return;
+    }
 
     if (!user) {
       this.responseHandler(res, this.UNAUTHORIZED_CODE, this.UNAUTHORIZED_MSG);

@@ -31,7 +31,7 @@ export const changePassword = (payload: { currentPassword: string; newPassword: 
     body: JSON.stringify(payload),
   });
 
-export const requestPromotion = (payload: { role_id: string; reason: string }) =>
+export const requestPromotion = (payload: { requested_role: string; reason: string }) =>
   apiFetch<ApiResponse<null>>("/promotion/request", {
     method: "POST",
     body: JSON.stringify(payload),
