@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaShieldAlt,
   FaFeatherAlt,
@@ -11,7 +11,88 @@ import {
   FaQuoteLeft,
   FaCheckCircle,
   FaStar,
+  FaClock,
 } from "react-icons/fa";
+import { useArticles } from "@/context/ArticlesContext";
+import type { PublicArticle } from "@/types/reader";
+
+const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
+const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
+const authorInitials = (name: string) =>
+  name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const readingTime = (html: string) => {
+  const words = html.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+};
+
+const HomeBlogCard = ({ article }: { article: PublicArticle }) => {
+  const color = accentFor(article.article_id);
+  const mins = readingTime(article.content);
+  const navigate = useNavigate();
+  return (
+    <Link
+      to={`/articles/${article.slug}`}
+      className="group bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-50 transition-all duration-500 flex flex-col"
+    >
+      <div className="relative overflow-hidden h-48 bg-[#F0EDE7] shrink-0">
+        {article.cover_image ? (
+          <img
+            src={article.cover_image}
+            alt={article.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+            <FaFeatherAlt size={28} style={{ color }} className="opacity-40" />
+          </div>
+        )}
+      </div>
+      <div className="p-7 flex flex-col flex-1">
+        <h3 className="text-[#1A1A1A] font-bold text-xl leading-snug mb-3 group-hover:text-amber-700 transition-colors duration-200 flex-1 font-playfair">
+          {article.title}
+        </h3>
+        <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6 line-clamp-2">
+          {article.content.replace(/<[^>]*>/g, "").slice(0, 120)}…
+        </p>
+        <div className="flex items-center justify-between pt-4 border-t border-[#F0EDE7]">
+          <button
+            className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
+            onClick={(e) => { e.preventDefault(); navigate(`/authors/${article.author_id}`); }}
+          >
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+              style={{ backgroundColor: color }}
+            >
+              {authorInitials(article.author.fullname)}
+            </div>
+            <div className="text-left">
+              <p className="text-[#1A1A1A] text-xs font-semibold">{article.author.fullname}</p>
+              <p className="text-[#9B9B9B] text-[11px]">{formatDate(article.published_at)}</p>
+            </div>
+          </button>
+          <div className="flex items-center gap-1.5 text-[#9B9B9B] text-xs">
+            <FaClock size={10} className="text-amber-400" />
+            <span>{mins} min read</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const BlogCardSkeleton = () => (
+  <div className="bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] flex flex-col animate-pulse">
+    <div className="h-48 bg-[#E8E4DC]" />
+    <div className="p-7 flex flex-col gap-3">
+      <div className="h-4 bg-[#E8E4DC] rounded w-3/4" />
+      <div className="h-4 bg-[#E8E4DC] rounded w-full" />
+      <div className="h-4 bg-[#E8E4DC] rounded w-1/2" />
+    </div>
+  </div>
+);
 
 const useInView = (threshold = 0.12) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,6 +116,8 @@ const useInView = (threshold = 0.12) => {
 };
 
 const HomePage = () => {
+  const { homeArticles, homeLoading, ensureHome } = useArticles();
+
   useEffect(() => {
     const existingFonts = document.getElementById("insight-press-fonts");
     if (existingFonts) return;
@@ -45,6 +128,10 @@ const HomePage = () => {
       "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap";
     document.head.appendChild(fontLink);
   }, []);
+
+  useEffect(() => {
+    ensureHome();
+  }, [ensureHome]);
 
   const { ref: featuresRef, inView: featuresInView } = useInView();
   const { ref: stepsRef, inView: stepsInView } = useInView();
@@ -116,50 +203,6 @@ const HomePage = () => {
     },
   ];
 
-  const featuredBlogPosts = [
-    {
-      category: "Design",
-      title: "The Invisible Grid: How Whitespace Shapes Reader Trust",
-      excerpt:
-        "Great design isn't about what you add — it's about the breath you leave between ideas. Here's how whitespace communicates credibility.",
-      author: "Amara Osei",
-      role: "Product Designer",
-      readTime: "5 min read",
-      initials: "AO",
-      accentColor: "#E8A838",
-      image:
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=700&q=80&auto=format&fit=crop",
-      imageAlt: "Abstract colourful design shapes",
-    },
-    {
-      category: "Engineering",
-      title: "Building for the Long Run: Why Boring Tech Wins",
-      excerpt:
-        "Chasing trends is tempting. But the most resilient products are built on dull, proven foundations that scale quietly for years.",
-      author: "James Mwangi",
-      role: "Senior Engineer",
-      readTime: "7 min read",
-      initials: "JM",
-      accentColor: "#5B8DEF",
-      image:
-        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&q=80&auto=format&fit=crop",
-      imageAlt: "Code on a dark monitor screen",
-    },
-    {
-      category: "Writing",
-      title: "The First Sentence Is Everything — Here's How to Write One",
-      excerpt:
-        "Readers decide within three seconds. A masterful opening doesn't announce itself — it simply pulls you forward without asking.",
-      author: "Lena Kovač",
-      role: "Journalist & Author",
-      readTime: "4 min read",
-      initials: "LK",
-      accentColor: "#3DBDA7",
-      image:
-        "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=700&q=80&auto=format&fit=crop",
-      imageAlt: "Open notebook with a pen",
-    },
-  ];
 
   const authorTestimonials = [
     {
@@ -459,59 +502,25 @@ const HomePage = () => {
             </Link>
           </div>
           <div ref={blogsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredBlogPosts.map((blogPost, i) => (
-              <article
-                key={blogPost.title}
-                className={`group bg-white rounded-2xl overflow-hidden border border-[#E8E4DC] hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-50 transition-all duration-500 cursor-pointer flex flex-col ${blogsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                style={{ transitionDelay: `${i * 120}ms` }}
-              >
-                <div className="relative overflow-hidden h-48 bg-[#F0EDE7] shrink-0">
-                  <img
-                    src={blogPost.image}
-                    alt={blogPost.imageAlt}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <span
-                    className="absolute top-4 left-4 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full text-white shadow-lg"
-                    style={{ backgroundColor: blogPost.accentColor }}
+            {homeLoading || homeArticles === null
+              ? [...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`transition-all duration-700 ${blogsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                    style={{ transitionDelay: `${i * 120}ms` }}
                   >
-                    {blogPost.category}
-                  </span>
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-white/30 to-transparent" />
-                </div>
-                <div className="p-7 flex flex-col flex-1">
-                  <h3 className="text-[#1A1A1A] font-bold text-xl leading-snug mb-3 group-hover:text-amber-700 transition-colors duration-200 flex-1 font-playfair">
-                    {blogPost.title}
-                  </h3>
-                  <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">
-                    {blogPost.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-[#F0EDE7]">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ backgroundColor: blogPost.accentColor }}
-                      >
-                        {blogPost.initials}
-                      </div>
-                      <div>
-                        <p className="text-[#1A1A1A] text-xs font-semibold">
-                          {blogPost.author}
-                        </p>
-                        <p className="text-[#9B9B9B] text-[11px]">
-                          {blogPost.role}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#9B9B9B] text-xs">
-                      <FaShieldAlt size={11} className="text-amber-500" />
-                      <span>{blogPost.readTime}</span>
-                    </div>
+                    <BlogCardSkeleton />
                   </div>
-                </div>
-              </article>
-            ))}
+                ))
+              : homeArticles.map((article, i) => (
+                  <div
+                    key={article.article_id}
+                    className={`transition-all duration-700 ${blogsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                    style={{ transitionDelay: `${i * 120}ms` }}
+                  >
+                    <HomeBlogCard article={article} />
+                  </div>
+                ))}
           </div>
         </div>
       </section>

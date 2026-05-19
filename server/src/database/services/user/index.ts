@@ -1,5 +1,6 @@
 import CreateUserService from "@/database/services/user/user-create.js";
 import GetOneUserByEmailService from "@/database/services/user/user-get-one-by-email.js";
+import GetOneUserByIdService from "@/database/services/user/user-get-one-by-id.js";
 import SigninUserService from "@/database/services/user/user-login.js";
 import UpdateUserService from "@/database/services/user/user-update.js";
 import ChangePasswordService from "@/database/services/user/user-change-password.js";
@@ -8,6 +9,7 @@ import ResetPasswordService from "@/database/services/user/reset-password-servic
 
 const CreateUser = new CreateUserService();
 const GetUserByEmail = new GetOneUserByEmailService();
+const GetUserById = new GetOneUserByIdService();
 const SignInUser = new SigninUserService();
 const UpdateUser = new UpdateUserService();
 const ChangePassword = new ChangePasswordService();
@@ -17,6 +19,7 @@ const ResetPassword = new ResetPasswordService();
 const UserServices = {
   CreateUser,
   GetUserByEmail,
+  GetUserById,
   SignInUser,
   UpdateUser,
   ChangePassword,
