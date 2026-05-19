@@ -15,6 +15,7 @@ import { AdminUsersView } from "@/components/dashboard/views/admin-users-view";
 import { AdminPromotionsView } from "@/components/dashboard/views/admin-promotions-view";
 import { ReaderOverviewView } from "@/components/dashboard/views/reader-overview-view";
 import { useAuth } from "@/context/AuthContext";
+import type { Article } from "@/types/writer";
 
 const VIEW_LABELS: Record<View, string> = {
   overview: "Overview",
@@ -68,6 +69,7 @@ const DashboardPage = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [publishedToastVisible, setPublishedToastVisible] = useState(false);
   const [savedToastVisible, setSavedToastVisible] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -83,7 +85,14 @@ const DashboardPage = () => {
   }, [user?.role?.name]);
 
   const navigateTo = (view: View) => {
+    if (view !== "new-post") setEditingArticle(null);
     setCurrentView(view);
+    setMobileSidebarOpen(false);
+  };
+
+  const editArticle = (article: Article) => {
+    setEditingArticle(article);
+    setCurrentView("new-post");
     setMobileSidebarOpen(false);
   };
 
@@ -167,9 +176,18 @@ const DashboardPage = () => {
 
             {currentView === "overview" && <OverviewView navigate={(v) => navigateTo(v as WriterView)} />}
             {currentView === "new-post" && (
-              <NewPostView onPublish={showPublishedToast} onSaveDraft={showSavedToast} />
+              <NewPostView
+                editingArticle={editingArticle}
+                onPublish={showPublishedToast}
+                onSaveDraft={showSavedToast}
+              />
             )}
-            {currentView === "my-posts" && <MyPostsView navigate={(v) => navigateTo(v as WriterView)} />}
+            {currentView === "my-posts" && (
+              <MyPostsView
+                navigate={(v) => navigateTo(v as WriterView)}
+                onEdit={editArticle}
+              />
+            )}
             {currentView === "analytics" && <AnalyticsView />}
             {currentView === "comments" && <CommentsView />}
             {currentView === "media" && <MediaView />}
