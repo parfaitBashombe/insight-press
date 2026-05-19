@@ -28,7 +28,7 @@ const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> 
 
       if (!retryRes.ok) {
         const err = await retryRes.json().catch(() => ({}));
-        throw new Error(err?.message ?? `Request failed: ${retryRes.status}`);
+        throw new Error((err as { message?: string })?.message ?? `Request failed: ${retryRes.status}`);
       }
 
       return retryRes.json() as Promise<T>;
@@ -39,7 +39,7 @@ const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.message ?? `Request failed: ${res.status}`);
+    throw new Error((err as { message?: string })?.message ?? `Request failed: ${res.status}`);
   }
 
   return res.json() as Promise<T>;

@@ -1,6 +1,6 @@
 import { FaEye } from "react-icons/fa";
 import { FaPlus, FaTrash } from "react-icons/fa6";
-import { MEDIA } from "../mock-data";
+import { MEDIA } from "@/components/dashboard/mock-data";
 
 export const MediaView = () => (
   <div className="max-w-6xl mx-auto space-y-6">

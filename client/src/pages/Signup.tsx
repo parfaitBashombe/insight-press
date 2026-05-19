@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { signupSchema, type SignupFormValues } from "@/lib/validators/auth";
 import {
   FaPen,
   FaFeatherAlt,
@@ -10,34 +10,10 @@ import {
   FaCheck,
   FaArrowRight,
 } from "react-icons/fa";
-import { signup } from "../lib/auth";
-import { useAuth } from "../context/AuthContext";
+import { signup } from "@/lib/api/auth";
+import { useAuth } from "@/context/AuthContext";
 
-const signUpSchema = z
-  .object({
-    fullName: z.string().min(1, "Full name is required"),
-    email: z.string().min(1, "Email is required").email("Enter a valid email"),
-    password: z
-      .string()
-      .min(1, "Password is required")
-      .min(8, "At least 8 characters required"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    agreed: z.boolean().refine((val) => val === true, {
-      message: "You must accept the terms",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type FormState = {
-  fullName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  agreed: boolean;
-};
+type FormState = SignupFormValues;
 type FormErrors = Partial<Record<keyof FormState, string>>;
 type Status = "idle" | "submitting" | "success";
 
@@ -80,7 +56,7 @@ const SignUpPage = () => {
   const strength = getStrength(form.password);
 
   const validate = (): boolean => {
-    const result = signUpSchema.safeParse(form);
+    const result = signupSchema.safeParse(form);
     if (result.success) {
       setErrors({});
       return true;
@@ -120,10 +96,7 @@ const SignUpPage = () => {
       setUser(res.data);
       setStatus("success");
       
-      const role = res.data.role?.name || "READER";
-      const target = role === "ADMIN" ? "/admin" : role === "WRITER" ? "/dashboard" : "/";
-      
-      setTimeout(() => navigate(target), 1200);
+      setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Something went wrong");
       setStatus("idle");

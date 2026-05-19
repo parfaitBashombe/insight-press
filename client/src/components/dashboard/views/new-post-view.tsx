@@ -3,7 +3,7 @@ import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { FaFeatherAlt } from "react-icons/fa";
 import { FaTag, FaXmark, FaFloppyDisk, FaPaperPlane } from "react-icons/fa6";
-import { quillModules, quillFormats } from "../mock-data";
+import { quillModules, quillFormats } from "@/components/dashboard/mock-data";
 
 interface Props {
   onPublish: () => void;

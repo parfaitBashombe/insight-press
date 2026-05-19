@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { FaEye } from "react-icons/fa";
 import { FaPlus, FaEllipsis, FaTrash } from "react-icons/fa6";
-import { POSTS } from "../mock-data";
-import type { View } from "../types";
+import { POSTS } from "@/components/dashboard/mock-data";
+import type { View } from "@/components/dashboard/types";
 
 interface Props {
   navigate: (v: View) => void;
