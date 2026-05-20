@@ -5,7 +5,7 @@ const IS_PROD = process.env.NODE_ENV === "production";
 const BASE_OPTIONS = {
   httpOnly: true,
   secure: IS_PROD,
-  sameSite: "strict" as const,
+  sameSite: (IS_PROD ? "none" : "lax") as "none" | "lax",
 };
 
 export const setAccessCookie = (res: Response, token: string): void => {
