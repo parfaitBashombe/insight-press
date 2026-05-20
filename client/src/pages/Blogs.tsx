@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaArrowRight, FaClock, FaTimes } from "react-icons/fa";
 import { FaFeatherAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { useArticles } from "@/context/ArticlesContext";
+import { useArticles } from "@/lib/context/articles-context";
 import type { PublicArticle } from "@/types/reader";
 
 const formatDate = (iso: string) =>

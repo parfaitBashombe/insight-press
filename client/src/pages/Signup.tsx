@@ -11,7 +11,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { signup } from "@/lib/api/auth";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 
 type FormState = SignupFormValues;
 type FormErrors = Partial<Record<keyof FormState, string>>;

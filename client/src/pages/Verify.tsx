@@ -10,7 +10,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import { requestPromotion } from "@/lib/api/auth";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 
 const verifySchema = z.object({
   reason: z

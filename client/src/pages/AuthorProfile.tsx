@@ -7,7 +7,7 @@ import {
 import { FaFeatherAlt } from "react-icons/fa";
 import { getAuthorProfile } from "@/lib/api/reader";
 import { followWriter, unfollowWriter, getFollowStatus } from "@/lib/api/follow";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 import type { AuthorProfile, ProfileArticle } from "@/types/reader";
 
 const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];

@@ -13,8 +13,8 @@ import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
 import DashboardPage from "./pages/Dashboard";
 import ProfilePage from "./pages/Profile";
-import { ArticlesProvider } from "./context/ArticlesContext";
-import { useAuth } from "./context/AuthContext";
+import { ArticlesProvider } from "@/lib/context/articles-context";
+import { useAuth } from "@/lib/context/auth-context";
 
 const GuestOnly = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();

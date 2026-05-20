@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaPen } from "react-icons/fa";
 import { FaCheck, FaTrash } from "react-icons/fa6";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 import { updateProfile, changePassword } from "@/lib/api/auth";
 
 type ToastState = { message: string; type: "success" | "error" } | null;

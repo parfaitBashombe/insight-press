@@ -19,26 +19,18 @@ class GetArticlesController extends BaseController {
     const page = parseInt((req.query.page as string) ?? "1", 10);
     const pageSize = parseInt((req.query.pageSize as string) ?? "10", 10);
 
-    const articles =
+    const paginated =
       await this.Service.ArticleServices.GetArticlesByAuthor.call({
         authorId: user.user_id,
         page: isNaN(page) || page < 1 ? 1 : page,
         pageSize: isNaN(pageSize) || pageSize < 1 ? 10 : pageSize,
       });
 
-    if (!articles) {
-      return this.responseHandler(
-        res,
-        this.SERVER_ERROR_CODE,
-        this.SERVER_ERROR_MSG,
-      );
-    }
-
     return this.responseHandler(
       res,
       this.SUCCESS_CODE,
       this.SUCCESS_MSG,
-      articles,
+      paginated,
     );
   }
 }

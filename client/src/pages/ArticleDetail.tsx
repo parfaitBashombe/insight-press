@@ -4,7 +4,7 @@ import { FaArrowLeft, FaClock, FaCalendar, FaUserPlus, FaUserCheck } from "react
 import { FaFeatherAlt } from "react-icons/fa";
 import { getArticleBySlug } from "@/lib/api/reader";
 import { followWriter, unfollowWriter, getFollowStatus } from "@/lib/api/follow";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 import type { PublicArticle } from "@/types/reader";
 
 const QUILL_PROSE = `

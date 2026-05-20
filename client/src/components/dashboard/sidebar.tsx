@@ -14,7 +14,7 @@ import {
   FaClipboardList,
 } from "react-icons/fa6";
 import type { View, WriterView, AdminView, ReaderView } from "@/components/dashboard/types";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 
 type NavItemConfig = {
   icon: React.ReactNode;

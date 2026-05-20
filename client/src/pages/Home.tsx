@@ -13,7 +13,7 @@ import {
   FaStar,
   FaClock,
 } from "react-icons/fa";
-import { useArticles } from "@/context/ArticlesContext";
+import { useArticles } from "@/lib/context/articles-context";
 import type { PublicArticle } from "@/types/reader";
 
 const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
