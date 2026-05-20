@@ -16,9 +16,36 @@ class App extends Base {
   }
 
   private initMiddlewares(): void {
+    this.app.use((req: Request, res: Response, next) => {
+      const allowed = (process.env.CLIENT_URL ?? "http://localhost:5173").split(
+        ",",
+      );
+      const origin = req.headers.origin;
+      if (origin && allowed.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+      }
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+      );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type,Authorization",
+      );
+      if (req.method === "OPTIONS") {
+        res.sendStatus(204);
+        return;
+      }
+      next();
+    });
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+  }
+
+  public getApp(): Application {
+    return this.app;
   }
 
   private initRoutes(routes: IRoute[]): void {
@@ -28,17 +55,17 @@ class App extends Base {
   }
 
   private initDefaultRoute(): void {
-    this.app.get("/", (req: Request, res: Response) => {
+    this.app.get("/", (_req: Request, res: Response) => {
       this.responseHandler(res, this.SUCCESS_CODE, this.WELCOME_MSG);
       return;
     });
 
-    this.app.all("/", (req: Request, res: Response) => {
+    this.app.all("/", (_req: Request, res: Response) => {
       this.responseHandler(res, this.BAD_REQUEST_CODE, this.INVALID_METHOD_MSG);
       return;
     });
 
-    this.app.use("*splat", (req: Request, res: Response) => {
+    this.app.use("*splat", (_req: Request, res: Response) => {
       this.responseHandler(res, this.NOT_FOUND_CODE, this.INVALID_ROUTE_MSG);
     });
     return;
