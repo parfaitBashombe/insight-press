@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaBars, FaCheck, FaFloppyDisk, FaPlus } from "react-icons/fa6";
 import type { View, WriterView, AdminView } from "@/components/dashboard/types";
 import { Sidebar } from "@/components/dashboard/sidebar";
@@ -14,7 +14,8 @@ import { AdminOverviewView } from "@/components/dashboard/views/admin-overview-v
 import { AdminUsersView } from "@/components/dashboard/views/admin-users-view";
 import { AdminPromotionsView } from "@/components/dashboard/views/admin-promotions-view";
 import { ReaderOverviewView } from "@/components/dashboard/views/reader-overview-view";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
+import { WriterProvider } from "@/lib/context/writer-context";
 import type { Article } from "@/types/writer";
 import { NotificationPanel } from "@/components/dashboard/notification-panel";
 
@@ -63,10 +64,12 @@ const DashboardPage = () => {
   const { user, loading } = useAuth();
   const routerNavigate = useNavigate();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const roleName = user?.role?.name ?? "READER";
-  const initialView = defaultViewByRole[roleName] ?? "reader-overview";
+  const defaultView = defaultViewByRole[roleName] ?? "reader-overview";
 
-  const [currentView, setCurrentView] = useState<View>(initialView);
+  const viewFromUrl = searchParams.get("tab") as View | null;
+  const [currentView, setCurrentView] = useState<View>(viewFromUrl ?? defaultView);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [publishedToastVisible, setPublishedToastVisible] = useState(false);
   const [savedToastVisible, setSavedToastVisible] = useState(false);
@@ -78,22 +81,27 @@ const DashboardPage = () => {
     }
   }, [user, loading, routerNavigate]);
 
+  // When auth resolves and there's no tab in URL, set default view for role
   useEffect(() => {
     if (user) {
-      const newRoleName = user.role?.name ?? "READER";
-      setCurrentView(defaultViewByRole[newRoleName] ?? "reader-overview");
+      const newDefault = defaultViewByRole[user.role?.name ?? "READER"] ?? "reader-overview";
+      if (!searchParams.get("tab")) {
+        setCurrentView(newDefault);
+      }
     }
   }, [user?.role?.name]);
 
   const navigateTo = (view: View) => {
     if (view !== "new-post") setEditingArticle(null);
     setCurrentView(view);
+    setSearchParams({ tab: view }, { replace: false });
     setMobileSidebarOpen(false);
   };
 
   const editArticle = (article: Article) => {
     setEditingArticle(article);
     setCurrentView("new-post");
+    setSearchParams({ tab: "new-post" }, { replace: false });
     setMobileSidebarOpen(false);
   };
 
@@ -176,23 +184,25 @@ const DashboardPage = () => {
           <main className="flex-1 px-5 sm:px-8 py-8">
             {currentView === "settings" && <SettingsView />}
 
-            {currentView === "overview" && <OverviewView navigate={(v) => navigateTo(v as WriterView)} />}
-            {currentView === "new-post" && (
-              <NewPostView
-                editingArticle={editingArticle}
-                onPublish={showPublishedToast}
-                onSaveDraft={showSavedToast}
-              />
-            )}
-            {currentView === "my-posts" && (
-              <MyPostsView
-                navigate={(v) => navigateTo(v as WriterView)}
-                onEdit={editArticle}
-              />
-            )}
-            {currentView === "analytics" && <AnalyticsView />}
-            {currentView === "comments" && <CommentsView />}
-            {currentView === "media" && <MediaView />}
+            <WriterProvider>
+              {currentView === "overview" && <OverviewView navigate={(v) => navigateTo(v as WriterView)} onEdit={editArticle} />}
+              {currentView === "new-post" && (
+                <NewPostView
+                  editingArticle={editingArticle}
+                  onPublish={showPublishedToast}
+                  onSaveDraft={showSavedToast}
+                />
+              )}
+              {currentView === "my-posts" && (
+                <MyPostsView
+                  navigate={(v) => navigateTo(v as WriterView)}
+                  onEdit={editArticle}
+                />
+              )}
+              {currentView === "analytics" && <AnalyticsView />}
+              {currentView === "comments" && <CommentsView />}
+              {currentView === "media" && <MediaView />}
+            </WriterProvider>
 
             {currentView === "admin-overview" && <AdminOverviewView navigate={(v) => navigateTo(v as AdminView)} />}
             {currentView === "admin-users" && <AdminUsersView />}

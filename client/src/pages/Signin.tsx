@@ -10,7 +10,7 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import { signin } from "@/lib/api/auth";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/auth-context";
 
 type FormState = SigninFormValues;
 type FormErrors = Partial<Record<keyof FormState, string>>;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Avatar, accentFor } from "@/components/avatar";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaShieldAlt,
@@ -13,13 +14,9 @@ import {
   FaStar,
   FaClock,
 } from "react-icons/fa";
-import { useArticles } from "@/context/ArticlesContext";
+import { useArticles } from "@/lib/context/articles-context";
 import type { PublicArticle } from "@/types/reader";
 
-const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
-const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
-const authorInitials = (name: string) =>
-  name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const readingTime = (html: string) => {
@@ -62,12 +59,7 @@ const HomeBlogCard = ({ article }: { article: PublicArticle }) => {
             className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={(e) => { e.preventDefault(); navigate(`/authors/${article.author_id}`); }}
           >
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-              style={{ backgroundColor: color }}
-            >
-              {authorInitials(article.author.fullname)}
-            </div>
+            <Avatar name={article.author.fullname} avatar={article.author.avatar} id={article.author_id} size={8} />
             <div className="text-left">
               <p className="text-[#1A1A1A] text-xs font-semibold">{article.author.fullname}</p>
               <p className="text-[#9B9B9B] text-[11px]">{formatDate(article.published_at)}</p>

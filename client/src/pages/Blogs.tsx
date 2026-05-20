@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaArrowRight, FaClock, FaTimes } from "react-icons/fa";
 import { FaFeatherAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { useArticles } from "@/context/ArticlesContext";
+import { useArticles } from "@/lib/context/articles-context";
+import { Avatar, accentFor } from "@/components/avatar";
 import type { PublicArticle } from "@/types/reader";
 
 const formatDate = (iso: string) =>
@@ -13,16 +14,6 @@ const readingTime = (html: string) => {
   return Math.max(1, Math.ceil(words / 200));
 };
 
-const authorInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
-const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
 
 const ArticleCard = ({ article }: { article: PublicArticle }) => {
   const color = accentFor(article.article_id);
@@ -62,12 +53,7 @@ const ArticleCard = ({ article }: { article: PublicArticle }) => {
             className="flex items-center gap-2.5 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={(e) => { e.preventDefault(); navigate(`/authors/${article.author_id}`); }}
           >
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-              style={{ backgroundColor: color }}
-            >
-              {authorInitials(article.author.fullname)}
-            </div>
+            <Avatar name={article.author.fullname} avatar={article.author.avatar} id={article.author_id} size={7} />
             <div className="text-left">
               <p className="text-[#1A1A1A] text-xs font-semibold leading-tight">{article.author.fullname}</p>
               <p className="text-[#9B9B9B] text-[10px]">{formatDate(article.published_at)}</p>
@@ -120,12 +106,7 @@ const FeaturedCard = ({ article }: { article: PublicArticle }) => {
             className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={(e) => { e.preventDefault(); navigate(`/authors/${article.author_id}`); }}
           >
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-              style={{ backgroundColor: color }}
-            >
-              {authorInitials(article.author.fullname)}
-            </div>
+            <Avatar name={article.author.fullname} avatar={article.author.avatar} id={article.author_id} size={9} />
             <div className="text-left">
               <p className="text-white text-sm font-semibold">{article.author.fullname}</p>
               <p className="text-white/40 text-xs">

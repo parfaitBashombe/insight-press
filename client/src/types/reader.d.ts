@@ -13,6 +13,7 @@ export type PublicArticle = {
   author: {
     fullname: string;
     bio: string | null;
+    avatar: string | null;
   };
 };
 
@@ -32,6 +33,7 @@ export type AuthorProfile = {
     bio: string | null;
     twitter: string | null;
     department: string | null;
+    avatar: string | null;
     createdAt: string;
     followerCount: number;
   };

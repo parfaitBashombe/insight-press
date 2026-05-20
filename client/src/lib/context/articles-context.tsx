@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { getPublicArticles } from "@/lib/api/reader";
 import type { PublicArticle } from "@/types/reader";
 
@@ -32,8 +38,14 @@ const defaultBlog: BlogSlice = {
   loadingMore: false,
 };
 
-export const ArticlesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [homeArticles, setHomeArticles] = useState<PublicArticle[] | null>(null);
+export const ArticlesProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [homeArticles, setHomeArticles] = useState<PublicArticle[] | null>(
+    null,
+  );
   const [homeLoading, setHomeLoading] = useState(false);
   const homeDone = useRef(false);
 
@@ -62,22 +74,38 @@ export const ArticlesProvider = ({ children }: { children: React.ReactNode }) =>
 
   const doFetchBlog = useCallback(
     (pageNum: number, append: boolean, query: string) => {
-      syncSetBlog((prev) => ({ ...prev, loading: !append, loadingMore: append }));
-      getPublicArticles({ page: pageNum, pageSize: 10, search: query || undefined })
+      syncSetBlog((prev) => ({
+        ...prev,
+        loading: !append,
+        loadingMore: append,
+      }));
+      getPublicArticles({
+        page: pageNum,
+        pageSize: 10,
+        search: query || undefined,
+      })
         .then((res) =>
           syncSetBlog((prev) => ({
             ...prev,
-            articles: append ? [...prev.articles, ...res.data.data] : res.data.data,
+            articles: append
+              ? [...prev.articles, ...res.data.data]
+              : res.data.data,
             page: pageNum,
             totalPages: res.data.totalPages,
             query,
             loading: false,
             loadingMore: false,
-          }))
+          })),
         )
-        .catch(() => syncSetBlog((prev) => ({ ...prev, loading: false, loadingMore: false })));
+        .catch(() =>
+          syncSetBlog((prev) => ({
+            ...prev,
+            loading: false,
+            loadingMore: false,
+          })),
+        );
     },
-    [syncSetBlog]
+    [syncSetBlog],
   );
 
   const ensureBlog = useCallback(() => {
@@ -94,24 +122,34 @@ export const ArticlesProvider = ({ children }: { children: React.ReactNode }) =>
         doFetchBlog(1, false, q);
       }, 400);
     },
-    [doFetchBlog, syncSetBlog]
+    [doFetchBlog, syncSetBlog],
   );
 
   const loadMoreBlog = useCallback(() => {
     const curr = blogRef.current;
-    if (curr.page >= curr.totalPages || curr.loadingMore || curr.loading) return;
+    if (curr.page >= curr.totalPages || curr.loadingMore || curr.loading)
+      return;
     doFetchBlog(curr.page + 1, true, curr.query);
   }, [doFetchBlog]);
 
   return (
     <ArticlesContext.Provider
-      value={{ homeArticles, homeLoading, ensureHome, blog, ensureBlog, updateBlogQuery, loadMoreBlog }}
+      value={{
+        homeArticles,
+        homeLoading,
+        ensureHome,
+        blog,
+        ensureBlog,
+        updateBlogQuery,
+        loadMoreBlog,
+      }}
     >
       {children}
     </ArticlesContext.Provider>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useArticles = () => {
   const ctx = useContext(ArticlesContext);
   if (!ctx) throw new Error("useArticles must be used inside ArticlesProvider");

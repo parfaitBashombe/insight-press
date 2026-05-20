@@ -36,7 +36,8 @@ export const AdminPromotionsView = () => {
         await rejectPromotion(id);
       }
       fetchRequests();
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setActing(null);
     }

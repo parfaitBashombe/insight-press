@@ -36,7 +36,8 @@ export const AdminUsersView = () => {
       setUsers(res.data.data);
       setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,8 @@ export const AdminUsersView = () => {
     try {
       await updateUserRole(userId, roleId);
       await fetchUsers();
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setUpdating(null);
       setMenuOpen(null);
@@ -71,7 +73,8 @@ export const AdminUsersView = () => {
     try {
       await updateUserStatus(user.user_id, !user.status);
       await fetchUsers();
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setUpdating(null);
       setMenuOpen(null);

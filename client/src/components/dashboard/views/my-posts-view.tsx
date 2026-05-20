@@ -1,14 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { FaEye } from "react-icons/fa";
-import { FaPlus, FaEllipsis, FaTrash, FaEye as FaPublish, FaEyeSlash } from "react-icons/fa6";
-import { getMyArticles, deleteArticle, publishArticle, unpublishArticle } from "@/lib/api/writer";
+import { FaPlus, FaEllipsis, FaTrash, FaEye as FaPublish, FaEyeSlash, FaArrowsRotate } from "react-icons/fa6";
+import { publishArticle, unpublishArticle, deleteArticle } from "@/lib/api/writer";
+import { useWriter } from "@/lib/context/writer-context";
 import type { Article } from "@/types/writer";
 import type { WriterView } from "@/components/dashboard/types";
+import { PostDetailModal } from "@/components/dashboard/post-detail-modal";
 
 interface Props {
   navigate: (v: WriterView) => void;
   onEdit: (article: Article) => void;
 }
+
+const PAGE_SIZE = 15;
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -16,29 +20,18 @@ const formatDate = (iso: string) =>
 type StatusFilter = "All" | "Published" | "Drafts";
 
 export const MyPostsView = ({ navigate, onEdit }: Props) => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { articles, loaded, ensure, reload, patchArticle, removeArticle } = useWriter();
+
+  useEffect(() => { ensure(); }, [ensure]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [detailArticle, setDetailArticle] = useState<Article | null>(null);
+  const [reloading, setReloading] = useState(false);
 
-  const fetchArticles = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await getMyArticles(page, 15);
-      setArticles(res.data.data);
-      setTotalPages(res.data.totalPages);
-    } catch {
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+  // Reset page when filter changes
+  useEffect(() => { setPage(1); }, [statusFilter]);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -46,21 +39,30 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const filteredArticles = articles.filter((a) => {
+  const filtered = articles.filter((a) => {
     if (statusFilter === "Published") return a.status === "PUBLISHED";
     if (statusFilter === "Drafts") return a.status === "DRAFT";
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleReload = async () => {
+    setReloading(true);
+    await reload();
+    setReloading(false);
+  };
 
   const handlePublish = async (articleId: string) => {
     setActionInProgress(articleId);
     setOpenMenuId(null);
     try {
       await publishArticle(articleId);
-      setArticles((prev) =>
-        prev.map((a) => (a.article_id === articleId ? { ...a, status: "PUBLISHED" } : a))
-      );
-    } catch {
+      patchArticle(articleId, { status: "PUBLISHED", published_at: new Date().toISOString() });
+      setDetailArticle((prev) => prev?.article_id === articleId ? { ...prev, status: "PUBLISHED", published_at: new Date().toISOString() } : prev);
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }
@@ -71,10 +73,10 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
     setOpenMenuId(null);
     try {
       await unpublishArticle(articleId);
-      setArticles((prev) =>
-        prev.map((a) => (a.article_id === articleId ? { ...a, status: "DRAFT" } : a))
-      );
-    } catch {
+      patchArticle(articleId, { status: "DRAFT" });
+      setDetailArticle((prev) => prev?.article_id === articleId ? { ...prev, status: "DRAFT" } : prev);
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }
@@ -86,8 +88,10 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
     setOpenMenuId(null);
     try {
       await deleteArticle(articleId);
-      setArticles((prev) => prev.filter((a) => a.article_id !== articleId));
-    } catch {
+      removeArticle(articleId);
+      setDetailArticle(null);
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }
@@ -95,6 +99,18 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {detailArticle && (
+        <PostDetailModal
+          article={detailArticle}
+          onClose={() => setDetailArticle(null)}
+          onEdit={onEdit}
+          onPublish={handlePublish}
+          onUnpublish={handleUnpublish}
+          onDelete={handleDelete}
+          actionInProgress={actionInProgress === detailArticle.article_id}
+        />
+      )}
+
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex gap-2">
           {(["All", "Published", "Drafts"] as StatusFilter[]).map((f) => (
@@ -111,21 +127,31 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
             </button>
           ))}
         </div>
-        <button
-          onClick={() => navigate("new-post")}
-          className="ml-auto inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all duration-200"
-        >
-          <FaPlus size={10} /> New Post
-        </button>
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            onClick={handleReload}
+            disabled={reloading}
+            title="Reload"
+            className="text-white/25 hover:text-white/60 transition-colors disabled:opacity-30"
+          >
+            <FaArrowsRotate size={13} className={reloading ? "animate-spin" : ""} />
+          </button>
+          <button
+            onClick={() => navigate("new-post")}
+            className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-[#0C0C0C] font-bold px-4 py-2 rounded-full text-xs transition-all duration-200"
+          >
+            <FaPlus size={10} /> New Post
+          </button>
+        </div>
       </div>
 
-      {loading ? (
+      {!loaded ? (
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-16 bg-white/4 rounded-2xl animate-pulse" />
           ))}
         </div>
-      ) : filteredArticles.length === 0 ? (
+      ) : paginated.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-white/30 text-sm mb-4">
             {statusFilter === "All" ? "No articles yet." : `No ${statusFilter.toLowerCase()} articles.`}
@@ -139,12 +165,13 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
         </div>
       ) : (
         <div className="space-y-2">
-          {filteredArticles.map((article) => {
+          {paginated.map((article) => {
             const isActing = actionInProgress === article.article_id;
             return (
               <div
                 key={article.article_id}
-                className={`group bg-white/4 hover:bg-white/[0.07] border border-white/6 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all duration-200 ${
+                onClick={() => setDetailArticle(article)}
+                className={`group bg-white/4 hover:bg-white/[0.07] border border-white/6 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all duration-200 cursor-pointer ${
                   isActing ? "opacity-50 pointer-events-none" : ""
                 }`}
               >
@@ -176,14 +203,9 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
                     {article.status === "PUBLISHED" ? "Published" : "Draft"}
                   </span>
 
-                  <div
-                    className="relative"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <div className="relative" onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() =>
-                        setOpenMenuId(openMenuId === article.article_id ? null : article.article_id)
-                      }
+                      onClick={() => setOpenMenuId(openMenuId === article.article_id ? null : article.article_id)}
                       className="text-white/20 hover:text-white/50 transition-colors p-1"
                     >
                       <FaEllipsis size={14} />
@@ -191,10 +213,7 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
                     {openMenuId === article.article_id && (
                       <div className="absolute right-0 top-full mt-1 w-40 bg-[#1a1a1a] border border-white/8 rounded-xl shadow-2xl z-10 overflow-hidden">
                         <button
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onEdit(article);
-                          }}
+                          onClick={() => { setOpenMenuId(null); onEdit(article); }}
                           className="w-full text-left px-4 py-2.5 text-white/60 hover:text-white hover:bg-white/5 text-xs transition-colors"
                         >
                           Edit
@@ -231,7 +250,7 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
         </div>
       )}
 
-      {totalPages > 1 && !loading && (
+      {loaded && totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -240,9 +259,7 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
           >
             Previous
           </button>
-          <span className="text-white/30 text-xs">
-            {page} / {totalPages}
-          </span>
+          <span className="text-white/30 text-xs">{page} / {totalPages}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}

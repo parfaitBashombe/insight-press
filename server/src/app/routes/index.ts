@@ -10,17 +10,15 @@ import FollowRoutes from "@/app/routes/follow/index.js";
 import NotificationRoutes from "@/app/routes/notification/index.js";
 
 const routes: IRoute[] = [
-  ...Object.values({
-    ...UserRoutes,
-    ...PromotionRoutes,
-    ...ProfileRoutes,
-    ...AdminRoutes,
-    ...WriterRoutes,
-    ...ReaderRoutes,
-    ...MediaRoutes,
-    ...FollowRoutes,
-    ...NotificationRoutes,
-  }),
+  ...Object.values(UserRoutes),
+  ...Object.values(PromotionRoutes),
+  ...Object.values(ProfileRoutes),
+  ...Object.values(AdminRoutes),
+  ...Object.values(WriterRoutes),
+  ...Object.values(ReaderRoutes),
+  ...Object.values(MediaRoutes),
+  ...Object.values(FollowRoutes),
+  ...Object.values(NotificationRoutes),
 ];
 
 export default routes;
