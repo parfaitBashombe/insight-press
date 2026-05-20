@@ -5,6 +5,7 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { getArticleBySlug } from "@/lib/api/reader";
 import { followWriter, unfollowWriter, getFollowStatus } from "@/lib/api/follow";
 import { useAuth } from "@/lib/context/auth-context";
+import { Avatar } from "@/components/avatar";
 import type { PublicArticle } from "@/types/reader";
 
 const QUILL_PROSE = `
@@ -30,11 +31,6 @@ const readingTime = (html: string) => {
   return Math.max(1, Math.ceil(words / 200));
 };
 
-const authorInitials = (name: string) =>
-  name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-
-const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
-const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
 
 const ArticleDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -74,7 +70,8 @@ const ArticleDetailPage = () => {
         await followWriter(article.author_id);
         setFollowing(true);
       }
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setFollowLoading(false);
     }
@@ -101,7 +98,6 @@ const ArticleDetailPage = () => {
     );
   }
 
-  const color = accentFor(article.article_id);
   const mins = readingTime(article.content);
   const isOwnArticle = user?.user_id === article.author_id;
 
@@ -124,12 +120,7 @@ const ArticleDetailPage = () => {
               to={`/authors/${article.author_id}`}
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ backgroundColor: color }}
-              >
-                {authorInitials(article.author.fullname)}
-              </div>
+              <Avatar name={article.author.fullname} avatar={article.author.avatar} id={article.author_id} size={8} />
               <span className="text-white/70 font-medium hover:text-white transition-colors">
                 {article.author.fullname}
               </span>
@@ -160,12 +151,7 @@ const ArticleDetailPage = () => {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-start justify-between gap-4 bg-white border border-[#E8E4DC] rounded-2xl p-5 mb-10">
             <Link to={`/authors/${article.author_id}`} className="flex items-start gap-4 flex-1 min-w-0 hover:opacity-80 transition-opacity">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                style={{ backgroundColor: color }}
-              >
-                {authorInitials(article.author.fullname)}
-              </div>
+              <Avatar name={article.author.fullname} avatar={article.author.avatar} id={article.author_id} size={10} />
               <div className="min-w-0">
                 <p className="text-[#1a1a1a] text-sm font-semibold mb-0.5">{article.author.fullname}</p>
                 {article.author.bio ? (

@@ -14,10 +14,12 @@ class GetPublicArticleBySlugService extends BaseService<
       include: {
         author: {
           select: {
+            user_id: true,
             fullname: true,
             bio: true,
             department: true,
             twitter: true,
+            avatar: true,
           },
         },
       },

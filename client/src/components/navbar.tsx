@@ -119,7 +119,7 @@ const ProfileDropdown = ({ onClose }: { onClose: () => void }) => {
           Dashboard
         </Link>
         <Link
-          to="/profile"
+          to="/dashboard?tab=settings"
           onClick={onClose}
           className="flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-white/4 transition-colors text-sm"
         >
@@ -318,7 +318,7 @@ const Navbar = () => {
                       </>
                     )}
                   </NavLink>
-                  <NavLink to="/profile" onClick={() => setOpen(false)} className={linkStyles}>
+                  <NavLink to="/dashboard?tab=settings" onClick={() => setOpen(false)} className={linkStyles}>
                     {({ isActive }) => (
                       <>
                         <span>My Profile</span>

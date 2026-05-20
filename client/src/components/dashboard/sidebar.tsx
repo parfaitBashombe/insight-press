@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { Avatar } from "@/components/avatar";
 import { FaPen, FaFeatherAlt } from "react-icons/fa";
 import {
   FaHouse,
@@ -93,14 +94,6 @@ export const Sidebar = ({
       ? writerNavItems
       : readerNavItems;
 
-  const userInitials = user?.fullname
-    ? user.fullname
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "??";
 
   const handleLogout = async () => {
     await logout();
@@ -155,9 +148,7 @@ export const Sidebar = ({
       </div>
 
       <div className="mt-4 p-3 bg-white/4 border border-white/8 rounded-xl flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-xs font-bold text-[#0C0C0C] shrink-0">
-          {userInitials}
-        </div>
+        {user && <Avatar name={user.fullname} avatar={user.avatar} id={user.user_id} size={9} />}
         <div className="min-w-0">
           <p className="text-white/80 text-xs font-semibold truncate">{user?.fullname}</p>
           <div className="flex items-center gap-1 mt-0.5">

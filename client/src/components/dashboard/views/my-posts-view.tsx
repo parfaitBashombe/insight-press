@@ -5,7 +5,7 @@ import { publishArticle, unpublishArticle, deleteArticle } from "@/lib/api/write
 import { useWriter } from "@/lib/context/writer-context";
 import type { Article } from "@/types/writer";
 import type { WriterView } from "@/components/dashboard/types";
-import { PostDetailModal } from "@/components/dashboard/PostDetailModal";
+import { PostDetailModal } from "@/components/dashboard/post-detail-modal";
 
 interface Props {
   navigate: (v: WriterView) => void;
@@ -61,7 +61,8 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
       await publishArticle(articleId);
       patchArticle(articleId, { status: "PUBLISHED", published_at: new Date().toISOString() });
       setDetailArticle((prev) => prev?.article_id === articleId ? { ...prev, status: "PUBLISHED", published_at: new Date().toISOString() } : prev);
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }
@@ -74,7 +75,8 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
       await unpublishArticle(articleId);
       patchArticle(articleId, { status: "DRAFT" });
       setDetailArticle((prev) => prev?.article_id === articleId ? { ...prev, status: "DRAFT" } : prev);
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }
@@ -88,7 +90,8 @@ export const MyPostsView = ({ navigate, onEdit }: Props) => {
       await deleteArticle(articleId);
       removeArticle(articleId);
       setDetailArticle(null);
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setActionInProgress(null);
     }

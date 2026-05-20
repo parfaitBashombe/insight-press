@@ -8,10 +8,9 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { getAuthorProfile } from "@/lib/api/reader";
 import { followWriter, unfollowWriter, getFollowStatus } from "@/lib/api/follow";
 import { useAuth } from "@/lib/context/auth-context";
+import { Avatar, accentFor } from "@/components/avatar";
 import type { AuthorProfile, ProfileArticle } from "@/types/reader";
 
-const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
-const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -24,8 +23,6 @@ const readingTime = (html: string) => {
   return Math.max(1, Math.ceil(words / 200));
 };
 
-const authorInitials = (name: string) =>
-  name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
 const ArticleCard = ({ article }: { article: ProfileArticle }) => {
   const color = accentFor(article.article_id);
@@ -122,7 +119,8 @@ const AuthorProfilePage = () => {
         setFollowing(true);
         setFollowerCount((c) => c + 1);
       }
-    } catch {
+    } catch (e) {
+      console.error(e);
     } finally {
       setFollowLoading(false);
     }
@@ -185,12 +183,7 @@ const AuthorProfilePage = () => {
             <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-2xl font-bold text-white shadow-2xl"
-                  style={{ backgroundColor: color, boxShadow: `0 16px 50px ${color}40` }}
-                >
-                  {authorInitials(author.fullname)}
-                </div>
+                <Avatar name={author.fullname} avatar={author.avatar} id={author.user_id} size={24} rounded="3xl" textSize="text-3xl" />
                 <div
                   className="absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full border-2 border-[#0C0C0C] flex items-center justify-center"
                   style={{ backgroundColor: color }}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef, useMemo } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
@@ -5,7 +6,7 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { FaFloppyDisk, FaPaperPlane, FaImage, FaXmark } from "react-icons/fa6";
 import { quillFormats } from "@/components/dashboard/mock-data";
 import { createArticle, updateArticle, publishArticle } from "@/lib/api/writer";
-import { ImageUploadModal } from "@/components/dashboard/ImageUploadModal";
+import { ImageUploadModal } from "@/components/dashboard/image-upload-modal";
 import type { Article } from "@/types/writer";
 
 interface Props {
@@ -16,7 +17,11 @@ interface Props {
 
 type ModalTarget = "cover" | "content";
 
-export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) => {
+export const NewPostView = ({
+  editingArticle,
+  onPublish,
+  onSaveDraft,
+}: Props) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -26,7 +31,8 @@ export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) =
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [imageModalTarget, setImageModalTarget] = useState<ModalTarget>("cover");
+  const [imageModalTarget, setImageModalTarget] =
+    useState<ModalTarget>("cover");
   const quillRef = useRef<ReactQuill>(null);
 
   useEffect(() => {
@@ -66,20 +72,23 @@ export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) =
   };
 
   // Custom quill modules with image handler bound to component state
-  const quillModules = useMemo(() => ({
-    toolbar: {
-      container: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline", "strike", "blockquote"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["link", "image"],
-        ["clean"],
-      ],
-      handlers: {
-        image: () => openModal("content"),
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ["bold", "italic", "underline", "strike", "blockquote"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: () => openModal("content"),
+        },
       },
-    },
-  }), []);
+    }),
+    [],
+  );
 
   const wordCount = content
     .replace(/<[^>]*>/g, "")
@@ -161,7 +170,10 @@ export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) =
               <FaImage size={10} /> Change
             </button>
             <button
-              onClick={() => { setCoverImage(""); setCoverPreviewError(false); }}
+              onClick={() => {
+                setCoverImage("");
+                setCoverPreviewError(false);
+              }}
               className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-red-500/60 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
             >
               <FaXmark size={10} /> Remove
@@ -200,14 +212,14 @@ export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) =
         />
       </div>
 
-      {error && (
-        <p className="text-red-400 text-xs">{error}</p>
-      )}
+      {error && <p className="text-red-400 text-xs">{error}</p>}
 
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-2 text-white/25 text-xs">
           <FaFeatherAlt size={10} className="text-amber-400/50" />
-          <span>{wordCount} {wordCount === 1 ? "word" : "words"}</span>
+          <span>
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
           {wordCount > 0 && (
             <>
               <span>·</span>
@@ -222,7 +234,9 @@ export const NewPostView = ({ editingArticle, onPublish, onSaveDraft }: Props) =
             className="inline-flex items-center gap-2 border border-white/10 hover:border-white/20 text-white/50 hover:text-white/80 disabled:opacity-40 disabled:cursor-not-allowed font-medium px-4 py-2.5 rounded-full text-xs transition-all duration-200"
           >
             <FaFloppyDisk size={11} />
-            <span className="hidden sm:inline">{saving ? "Saving…" : "Save draft"}</span>
+            <span className="hidden sm:inline">
+              {saving ? "Saving…" : "Save draft"}
+            </span>
           </button>
           <button
             onClick={handlePublish}

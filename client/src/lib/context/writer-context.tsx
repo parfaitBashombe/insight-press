@@ -52,8 +52,8 @@ export const WriterProvider = ({ children }: { children: ReactNode }) => {
       setTotal(articlesRes.data.total);
       done.current = true;
       setLoaded(true);
-    } catch {
-      /* fetch errors are silent — UI shows stale/empty state */
+    } catch (e) {
+      console.error(e);
     } finally {
       fetchingRef.current = false;
     }

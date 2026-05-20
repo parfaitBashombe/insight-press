@@ -7,6 +7,7 @@ type AuthorInfo = {
   bio: string | null;
   twitter: string | null;
   department: string | null;
+  avatar: string | null;
   createdAt: Date;
   followerCount: number;
 };
@@ -27,6 +28,7 @@ class GetPublicAuthorProfileService extends BaseService<string, PublicAuthorProf
         bio: true,
         twitter: true,
         department: true,
+        avatar: true,
         createdAt: true,
         articles: {
           where: { status: "PUBLISHED" },
@@ -45,6 +47,7 @@ class GetPublicAuthorProfileService extends BaseService<string, PublicAuthorProf
         bio: author.bio,
         twitter: author.twitter,
         department: author.department,
+        avatar: author.avatar,
         createdAt: author.createdAt,
         followerCount: author._count.followers,
       },

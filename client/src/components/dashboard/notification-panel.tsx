@@ -28,7 +28,8 @@ export const NotificationPanel = () => {
       const res = await getNotifications();
       setNotifications(res.data.notifications);
       setUnreadCount(res.data.unreadCount);
-    } catch {
+    } catch (e) {
+      console.error(e);
     }
   }, []);
 
@@ -58,7 +59,8 @@ export const NotificationPanel = () => {
         )
       );
       setUnreadCount((c) => Math.max(0, c - 1));
-    } catch {
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -67,7 +69,8 @@ export const NotificationPanel = () => {
       await markAllNotificationsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch {
+    } catch (e) {
+      console.error(e);
     }
   };
 

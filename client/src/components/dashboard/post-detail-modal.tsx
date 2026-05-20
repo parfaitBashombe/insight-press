@@ -1,4 +1,5 @@
 import { FaClock, FaCalendar, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Avatar } from "@/components/avatar";
 import { FaPencil, FaTrash, FaXmark } from "react-icons/fa6";
 import { useAuth } from "@/lib/context/auth-context";
 import type { Article } from "@/types/writer";
@@ -36,11 +37,6 @@ const readingTime = (html: string) => {
   return Math.max(1, Math.ceil(words / 200));
 };
 
-const ACCENT_COLORS = ["#E8A838", "#5B8DEF", "#3DBDA7", "#E87B5B", "#9B7FE8"];
-const accentFor = (id: string) => ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
-
-const authorInitials = (name: string) =>
-  name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
 export const PostDetailModal = ({
   article,
@@ -54,7 +50,6 @@ export const PostDetailModal = ({
   const { user } = useAuth();
   const mins = readingTime(article.content);
   const isPublished = article.status === "PUBLISHED";
-  const color = accentFor(article.article_id);
   const authorName = user?.fullname ?? "Author";
 
   return (
@@ -103,12 +98,7 @@ export const PostDetailModal = ({
 
             <div className="flex flex-wrap items-center gap-5 text-white/40 text-sm">
               <div className="flex items-center gap-2.5">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                  style={{ backgroundColor: color }}
-                >
-                  {authorInitials(authorName)}
-                </div>
+                <Avatar name={authorName} avatar={user?.avatar} id={user?.user_id} size={8} />
                 <span className="text-white/70 font-medium">{authorName}</span>
               </div>
               {isPublished && article.published_at ? (

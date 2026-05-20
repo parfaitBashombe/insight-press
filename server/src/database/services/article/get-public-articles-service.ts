@@ -42,6 +42,7 @@ class GetPublicArticlesService extends BaseService<
             select: {
               fullname: true,
               bio: true,
+              avatar: true,
             },
           },
         },

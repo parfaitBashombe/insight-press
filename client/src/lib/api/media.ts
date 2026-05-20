@@ -19,6 +19,7 @@ export const uploadToImageKit = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("fileName", file.name);
+  formData.append("folder", "/insight_press");
   formData.append("publicKey", IMAGEKIT_PUBLIC_KEY);
   formData.append("token", token);
   formData.append("expire", String(expire));
